@@ -18,6 +18,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
+import { docSections } from "@/lib/docs";
 
 export default function Home() {
   return (
@@ -34,6 +35,12 @@ export default function Home() {
               className="text-gray-600 hover:text-primary font-medium transition"
             >
               무료 학습
+            </Link>
+            <Link
+              href="/docs"
+              className="text-gray-600 hover:text-primary font-medium transition"
+            >
+              가이드
             </Link>
             <Link
               href="/vps"
@@ -275,6 +282,51 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Claude Code 가이드 */}
+      <section className="py-20 px-6 bg-gray-50">
+        <div className="max-w-3xl mx-auto">
+          <p className="text-gray-500 text-center mb-2">📚 기능 가이드</p>
+          <h2 className="text-3xl font-extrabold text-center mb-4">
+            Claude Code, 이런 것도 됩니다
+          </h2>
+          <p className="text-gray-600 text-center mb-10">
+            워크샵 참가자를 위한 주요 기능 설명서
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-4 mb-8">
+            {docSections.slice(0, 6).map((section) => (
+              <Link
+                key={section.slug}
+                href={`/docs/${section.slug}`}
+                className="group flex items-start gap-4 bg-white border border-gray-200 rounded-2xl p-5 hover:border-primary hover:shadow-md transition cursor-pointer"
+              >
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+                  {section.icon}
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-gray-900 group-hover:text-primary transition mb-1">
+                    {section.title}
+                  </h3>
+                  <p className="text-sm text-gray-500 leading-relaxed line-clamp-2">
+                    {section.summary}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Link
+              href="/docs"
+              className="inline-flex items-center gap-2 border-2 border-primary text-primary px-6 py-3 rounded-full font-bold hover:bg-primary hover:text-white transition"
+            >
+              전체 가이드 보기
+              <ChevronRight size={18} />
+            </Link>
           </div>
         </div>
       </section>

@@ -6,10 +6,6 @@ import {
   Play,
   FileText,
   RefreshCw,
-  MapPin,
-  Clock,
-  Laptop,
-  MessageCircle,
   Smartphone,
   Rocket,
   DollarSign,
@@ -24,8 +20,6 @@ import {
 import Link from "next/link";
 
 export default function Home() {
-  const workshopUrl = "#"; // 문토 소셜링 링크로 교체
-
   return (
     <main className="min-h-screen">
       {/* Header */}
@@ -47,12 +41,6 @@ export default function Home() {
             >
               VPS
             </Link>
-            <a
-              href={workshopUrl}
-              className="bg-primary text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition"
-            >
-              워크샵 신청
-            </a>
           </div>
         </div>
       </header>
@@ -81,12 +69,12 @@ export default function Home() {
             <br />
             AI한테 시키면 안 되나? 해봤더니 <strong className="text-gray-900">진짜 됩니다.</strong>"
           </p>
-          <a
-            href={workshopUrl}
+          <Link
+            href="/learn/basics/1"
             className="inline-block bg-primary text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-500/25"
           >
-            워크샵 신청하기 →
-          </a>
+            무료로 시작하기 →
+          </Link>
         </div>
       </section>
 
@@ -237,7 +225,7 @@ export default function Home() {
             무료로 시작해보세요
           </h2>
           <p className="text-gray-600 text-center mb-10">
-            워크샵 전에 기초를 익혀오시면 더 깊이 배울 수 있어요
+            설치부터 첫 자동화까지, 단계별로 따라해보세요
           </p>
 
           <Link
@@ -308,46 +296,6 @@ export default function Home() {
             AI-Ready VPS 알아보기
             <ChevronRight size={20} />
           </Link>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-20 px-6 bg-gray-50">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <MessageCircle size={40} className="text-white" />
-          </div>
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
-            💬 자동화하고 싶은
-            <br />
-            업무가 있나요?
-          </h2>
-          <p className="text-xl text-gray-600 mb-8">
-            신청할 때 한 줄만 적어주세요
-            <br />
-            강의에서 직접 다뤄드립니다 ✨
-          </p>
-          <div className="flex flex-wrap justify-center gap-4 mb-10">
-            {[
-              { icon: MapPin, text: "강남역 인근", color: "text-primary" },
-              { icon: Clock, text: "3시간", color: "text-accent" },
-              { icon: Laptop, text: "노트북만 들고 오세요", color: "text-amber-500" },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full"
-              >
-                <item.icon size={18} className={item.color} />
-                <span className="text-sm font-medium">{item.text}</span>
-              </div>
-            ))}
-          </div>
-          <a
-            href={workshopUrl}
-            className="inline-block bg-accent text-white px-10 py-5 rounded-full text-xl font-bold hover:bg-green-600 transition shadow-lg shadow-green-500/25"
-          >
-            🙋 같이 해볼 사람? →
-          </a>
         </div>
       </section>
 

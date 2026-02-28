@@ -27,7 +27,7 @@ export default function DocDetailPage({
   params: { slug: string };
 }) {
   const section = getDocSection(params.slug);
-  if (!section) notFound();
+  if (!section) return notFound();
 
   const currentIndex = docSections.findIndex((s) => s.slug === params.slug);
   const prev = currentIndex > 0 ? docSections[currentIndex - 1] : null;

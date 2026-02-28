@@ -302,7 +302,7 @@ export default function Home() {
               <Link
                 key={section.slug}
                 href={`/docs/${section.slug}`}
-                className="group flex items-start gap-4 bg-white border border-gray-200 rounded-2xl p-5 hover:border-primary hover:shadow-md transition cursor-pointer"
+                className="group flex items-start gap-4 bg-white border border-gray-200 rounded-2xl p-5 hover:border-primary hover:shadow-md transition"
               >
                 <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
                   {section.icon}

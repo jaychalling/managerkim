@@ -32,7 +32,7 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-b border-gray-100 z-50">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="font-bold text-xl text-gray-900">
-            AutoWork<span className="text-primary">Kim</span>
+            Manager<span className="text-primary">Kim</span>
           </div>
           <div className="flex items-center gap-4">
             <Link
@@ -40,6 +40,12 @@ export default function Home() {
               className="text-gray-600 hover:text-primary font-medium transition"
             >
               무료 학습
+            </Link>
+            <Link
+              href="/vps"
+              className="text-gray-600 hover:text-primary font-medium transition"
+            >
+              VPS
             </Link>
             <a
               href={workshopUrl}
@@ -285,6 +291,26 @@ export default function Home() {
         </div>
       </section>
 
+      {/* VPS Promotion */}
+      <section className="py-20 px-6 bg-primary">
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="text-blue-200 mb-2">24시간 자동화</p>
+          <h2 className="text-3xl font-extrabold text-white mb-4">
+            만든 자동화, 계속 돌리고 싶다면?
+          </h2>
+          <p className="text-blue-100 mb-8">
+            PC 끄면 멈추는 자동화. VPS에 올리면 잠자는 동안에도 일합니다.
+          </p>
+          <Link
+            href="/vps"
+            className="inline-flex items-center gap-2 bg-white text-primary px-8 py-4 rounded-full text-lg font-bold hover:bg-gray-100 transition"
+          >
+            AI-Ready VPS 알아보기
+            <ChevronRight size={20} />
+          </Link>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-20 px-6 bg-gray-50">
         <div className="max-w-3xl mx-auto text-center">
@@ -329,13 +355,13 @@ export default function Home() {
       <footer className="py-10 px-6 border-t border-gray-100">
         <div className="max-w-3xl mx-auto text-center">
           <p className="font-bold text-gray-900 mb-2">
-            AutoWork<span className="text-primary">Kim</span>
+            Manager<span className="text-primary">Kim</span>
           </p>
           <p className="text-gray-500 text-sm">
             업무 자동화하는 회사원 김과장
           </p>
           <p className="text-gray-400 text-xs mt-4">
-            © 2026 AutoWorkKim. All rights reserved.
+            © 2026 ManagerKim. All rights reserved.
           </p>
         </div>
       </footer>

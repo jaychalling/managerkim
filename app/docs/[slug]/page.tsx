@@ -133,9 +133,34 @@ export default function DocDetailPage({
                   key={i}
                   className="bg-gray-900 rounded-2xl overflow-hidden"
                 >
+                  {block.title && (
+                    <div className="px-5 py-2 border-b border-gray-700">
+                      <span className="text-xs text-gray-400 font-medium">{block.title}</span>
+                    </div>
+                  )}
                   <pre className="p-5 overflow-x-auto text-sm">
                     <code className="text-green-400">{block.text}</code>
                   </pre>
+                </div>
+              );
+            }
+            if (block.type === "list") {
+              return (
+                <div
+                  key={i}
+                  className="bg-gray-50 border border-gray-200 rounded-2xl p-5"
+                >
+                  {block.title && (
+                    <h3 className="font-bold text-gray-900 mb-3">{block.title}</h3>
+                  )}
+                  <ul className="space-y-2">
+                    {block.items?.map((item, j) => (
+                      <li key={j} className="flex items-start gap-2 text-sm text-gray-600">
+                        <span className="text-primary mt-0.5 flex-shrink-0">•</span>
+                        <span className="leading-relaxed">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               );
             }

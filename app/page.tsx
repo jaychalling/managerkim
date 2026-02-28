@@ -18,7 +18,10 @@ import {
   Bot,
   CheckCircle,
   XCircle,
+  BookOpen,
+  ChevronRight,
 } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
   const workshopUrl = "#"; // 문토 소셜링 링크로 교체
@@ -31,12 +34,20 @@ export default function Home() {
           <div className="font-bold text-xl text-gray-900">
             AutoWork<span className="text-primary">Kim</span>
           </div>
-          <a
-            href={workshopUrl}
-            className="bg-primary text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition"
-          >
-            워크샵 신청
-          </a>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/learn"
+              className="text-gray-600 hover:text-primary font-medium transition"
+            >
+              무료 학습
+            </Link>
+            <a
+              href={workshopUrl}
+              className="bg-primary text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition"
+            >
+              워크샵 신청
+            </a>
+          </div>
         </div>
       </header>
 
@@ -212,8 +223,70 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* 무료 학습 */}
       <section className="py-20 px-6">
+        <div className="max-w-3xl mx-auto">
+          <p className="text-gray-500 text-center mb-2">🎓 먼저 맛보기</p>
+          <h2 className="text-3xl font-extrabold text-center mb-4">
+            무료로 시작해보세요
+          </h2>
+          <p className="text-gray-600 text-center mb-10">
+            워크샵 전에 기초를 익혀오시면 더 깊이 배울 수 있어요
+          </p>
+
+          <Link
+            href="/learn/basics/1"
+            className="block bg-gradient-to-r from-primary to-blue-600 rounded-2xl p-6 text-white hover:shadow-xl hover:shadow-blue-500/20 transition group"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
+                  <BookOpen size={32} />
+                </div>
+                <div>
+                  <p className="text-sm text-blue-200 mb-1">12단계 무료 코스</p>
+                  <h3 className="text-2xl font-bold">🚀 업무 자동화 기초</h3>
+                  <p className="text-blue-100 mt-1">
+                    Claude Code 설치부터 첫 자동화까지
+                  </p>
+                </div>
+              </div>
+              <ChevronRight
+                size={32}
+                className="text-white/50 group-hover:text-white group-hover:translate-x-1 transition"
+              />
+            </div>
+          </Link>
+
+          <div className="grid md:grid-cols-2 gap-4 mt-6">
+            <div className="bg-gray-100 rounded-xl p-5 opacity-60">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gray-300 rounded-lg flex items-center justify-center">
+                  <Mail size={24} className="text-gray-500" />
+                </div>
+                <div>
+                  <p className="font-bold text-gray-700">📧 Gmail 자동화</p>
+                  <p className="text-sm text-gray-500">준비 중...</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-gray-100 rounded-xl p-5 opacity-60">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gray-300 rounded-lg flex items-center justify-center">
+                  <FileText size={24} className="text-gray-500" />
+                </div>
+                <div>
+                  <p className="font-bold text-gray-700">📝 보고서 자동 생성</p>
+                  <p className="text-sm text-gray-500">준비 중...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 px-6 bg-gray-50">
         <div className="max-w-3xl mx-auto text-center">
           <div className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
             <MessageCircle size={40} className="text-white" />

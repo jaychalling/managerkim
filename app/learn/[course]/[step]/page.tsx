@@ -26,6 +26,7 @@ export default function LearnStep() {
   const [showHints, setShowHints] = useState(false);
   const [copied, setCopied] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [os, setOs] = useState<"mac" | "windows">("windows");
 
   useEffect(() => {
     const saved = localStorage.getItem(`progress-${courseId}`);
@@ -59,13 +60,23 @@ export default function LearnStep() {
     }
   };
 
+  const getCode = () => {
+    if (step.codeMac && step.codeWindows) {
+      return os === "mac" ? step.codeMac : step.codeWindows;
+    }
+    return step.code;
+  };
+
   const handleCopy = () => {
-    if (step.code) {
-      navigator.clipboard.writeText(step.code);
+    const code = getCode();
+    if (code) {
+      navigator.clipboard.writeText(code);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
   };
+
+  const hasOsSpecificCode = step.codeMac && step.codeWindows;
 
   return (
     <main className="min-h-screen bg-gray-950 text-white">
@@ -127,11 +138,36 @@ export default function LearnStep() {
           </section>
 
           {/* Code Block */}
-          {step.code && (
+          {(step.code || hasOsSpecificCode) && (
             <section className="mb-8">
               <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-2 border-b border-gray-800">
-                  <span className="text-sm text-gray-500">터미널 명령어</span>
+                  {hasOsSpecificCode ? (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setOs("windows")}
+                        className={`px-3 py-1 rounded-lg text-sm font-medium transition ${
+                          os === "windows"
+                            ? "bg-primary text-white"
+                            : "text-gray-400 hover:text-white"
+                        }`}
+                      >
+                        🪟 Windows
+                      </button>
+                      <button
+                        onClick={() => setOs("mac")}
+                        className={`px-3 py-1 rounded-lg text-sm font-medium transition ${
+                          os === "mac"
+                            ? "bg-primary text-white"
+                            : "text-gray-400 hover:text-white"
+                        }`}
+                      >
+                        🍎 Mac
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="text-sm text-gray-500">터미널 명령어</span>
+                  )}
                   <button
                     onClick={handleCopy}
                     className="flex items-center gap-1 text-sm text-gray-400 hover:text-white transition"
@@ -150,7 +186,7 @@ export default function LearnStep() {
                   </button>
                 </div>
                 <pre className="p-4 overflow-x-auto">
-                  <code className="text-lg text-green-400">{step.code}</code>
+                  <code className="text-lg text-green-400">{getCode()}</code>
                 </pre>
               </div>
             </section>

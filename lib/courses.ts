@@ -5,6 +5,8 @@ export interface Step {
   mission: string;
   hints: string[];
   code?: string;
+  codeWindows?: string;
+  codeMac?: string;
 }
 
 export interface Course {
@@ -56,6 +58,38 @@ export const courses: Course[] = [
       },
       {
         id: 3,
+        title: "준비물 확인",
+        concept: [
+          "Claude Code를 사용하려면 몇 가지가 필요해요.",
+          "1️⃣ Claude Pro 또는 Max 구독 (월 $20)",
+          "2️⃣ Windows는 Git for Windows 설치 필수",
+          "3️⃣ 인터넷 연결",
+        ],
+        mission: "Claude Pro 계정이 있는지 확인하세요",
+        hints: [
+          "claude.ai에서 구독 가능",
+          "무료 플랜은 Claude Code를 지원하지 않아요",
+          "워크샵에서는 강사가 제공하는 계정을 사용할 수 있어요",
+        ],
+      },
+      {
+        id: 4,
+        title: "Git for Windows 설치 (Windows만)",
+        concept: [
+          "Windows에서 Claude Code를 쓰려면 Git Bash가 필요해요.",
+          "Git for Windows를 설치하면 Git Bash가 함께 설치됩니다.",
+          "Mac 사용자는 이 단계를 건너뛰세요!",
+        ],
+        mission: "git-scm.com에서 Git for Windows를 설치하세요",
+        hints: [
+          "https://git-scm.com 접속",
+          "Download for Windows 클릭",
+          "설치 시 기본값으로 Next만 누르면 OK",
+          "Mac 사용자는 '완료했어요' 눌러서 건너뛰기",
+        ],
+      },
+      {
+        id: 5,
         title: "터미널 열기",
         concept: [
           "터미널은 컴퓨터와 대화하는 창구예요.",
@@ -64,75 +98,63 @@ export const courses: Course[] = [
         ],
         mission: "터미널을 열어보세요",
         hints: [
-          "Windows: Win + R → 'cmd' 입력 → Enter",
-          "또는: 시작 메뉴에서 'Git Bash' 검색",
-          "Mac: Cmd + Space → 'Terminal' 검색",
-        ],
-      },
-      {
-        id: 4,
-        title: "Node.js 설치 확인",
-        concept: [
-          "Node.js는 JavaScript를 실행하는 환경이에요.",
-          "Claude Code가 작동하려면 Node.js가 필요해요.",
-          "이미 설치되어 있는지 확인해볼게요.",
-        ],
-        mission: "터미널에 아래 명령어를 입력해보세요",
-        hints: [
-          "버전 번호가 나오면 설치된 거예요! (예: v20.10.0)",
-          "command not found가 나오면 설치가 필요해요",
-        ],
-        code: "node --version",
-      },
-      {
-        id: 5,
-        title: "Node.js 설치하기",
-        concept: [
-          "Node.js 공식 사이트에서 LTS 버전을 다운로드해요.",
-          "LTS = Long Term Support, 안정적인 버전이에요.",
-          "설치 과정에서 기본값으로 Next만 누르면 됩니다.",
-        ],
-        mission: "nodejs.org에서 LTS 버전을 설치하세요",
-        hints: [
-          "https://nodejs.org 접속",
-          "초록색 LTS 버튼 클릭",
-          "다운로드된 파일 실행 → Next → Next → Install",
-          "설치 후 터미널 다시 열기",
+          "Windows: 시작 메뉴 → 'Git Bash' 검색 → 클릭",
+          "Mac: Cmd + Space → 'Terminal' 검색 → Enter",
+          "검은 화면에 글자를 입력할 수 있으면 성공!",
         ],
       },
       {
         id: 6,
         title: "Claude Code 설치",
         concept: [
-          "npm은 Node.js의 패키지 관리자예요.",
-          "npm으로 Claude Code를 전역(-g) 설치합니다.",
-          "한 번 설치하면 어디서든 사용할 수 있어요.",
+          "공식 설치 스크립트로 Claude Code를 설치해요.",
+          "자동 업데이트가 포함되어 있어서 편리합니다.",
+          "설치는 1-2분 정도 걸려요.",
         ],
         mission: "터미널에 아래 명령어를 입력하세요",
         hints: [
-          "설치에 1-2분 정도 걸릴 수 있어요",
-          "에러가 나면 터미널을 관리자 권한으로 실행해보세요",
+          "명령어를 복사해서 붙여넣기 하세요",
+          "Enter를 누르면 설치가 시작됩니다",
+          "설치 완료 메시지가 나올 때까지 기다리세요",
         ],
-        code: "npm install -g @anthropic-ai/claude-code",
+        codeMac: "curl -fsSL https://claude.ai/install.sh | bash",
+        codeWindows: "irm https://claude.ai/install.ps1 | iex",
       },
       {
         id: 7,
-        title: "Claude Code 첫 실행",
+        title: "설치 확인",
         concept: [
-          "설치가 끝났으면 claude를 실행해볼게요.",
-          "처음 실행하면 로그인 화면이 나와요.",
-          "Anthropic 계정으로 로그인하면 됩니다.",
+          "설치가 잘 됐는지 확인해볼게요.",
+          "claude --version 명령어로 버전을 확인할 수 있어요.",
+          "버전 번호가 나오면 설치 성공!",
         ],
-        mission: "터미널에 claude를 입력하세요",
+        mission: "Claude Code 버전을 확인하세요",
         hints: [
-          "브라우저가 열리면서 로그인 페이지가 나와요",
-          "계정이 없으면 새로 만들면 됩니다",
+          "숫자가 나오면 설치 성공! (예: 1.0.0)",
+          "command not found가 나오면 터미널을 다시 열어보세요",
+          "그래도 안 되면 설치를 다시 해보세요",
+        ],
+        code: "claude --version",
+      },
+      {
+        id: 8,
+        title: "로그인하기",
+        concept: [
+          "Claude Code를 처음 실행하면 로그인이 필요해요.",
+          "브라우저가 자동으로 열리면서 로그인 페이지가 나와요.",
+          "Claude Pro/Max 계정으로 로그인하면 됩니다.",
+        ],
+        mission: "claude 명령어를 실행하고 로그인하세요",
+        hints: [
+          "터미널에 claude 입력 후 Enter",
+          "브라우저가 열리면 로그인",
           "로그인 후 터미널로 돌아오세요",
+          "Logged in as... 메시지가 나오면 성공!",
         ],
         code: "claude",
       },
       {
-        id: 8,
+        id: 9,
         title: "작업 폴더 만들기",
         concept: [
           "Claude Code로 작업할 폴더를 만들어요.",
@@ -141,30 +163,32 @@ export const courses: Course[] = [
         ],
         mission: "autowork 폴더를 만들고 이동하세요",
         hints: [
-          "mkdir = 폴더 만들기",
-          "cd = 폴더로 이동하기",
+          "mkdir = 폴더 만들기 (make directory)",
+          "cd = 폴더로 이동하기 (change directory)",
+          "Windows Git Bash와 Mac 모두 같은 명령어예요",
         ],
         code: "mkdir ~/Desktop/autowork && cd ~/Desktop/autowork",
       },
       {
-        id: 9,
+        id: 10,
         title: "첫 번째 대화하기",
         concept: [
-          "Claude Code를 실행하고 대화를 시작해봐요.",
+          "이제 Claude Code와 대화해봐요!",
           "한국어로 자연스럽게 말하면 됩니다.",
           "간단한 질문으로 시작해볼게요.",
         ],
         mission: "Claude Code에게 인사해보세요",
         hints: [
-          "claude 명령어로 시작",
+          "폴더 안에서 claude 명령어 실행",
           "'안녕, 넌 뭘 할 수 있어?' 라고 물어보세요",
-          "Ctrl+C로 종료할 수 있어요",
+          "Ctrl+C로 대화 종료 가능",
+          "Esc 두 번 눌러도 종료돼요",
         ],
         code: "claude",
       },
       {
-        id: 10,
-        title: "간단한 웹페이지 만들기",
+        id: 11,
+        title: "웹페이지 만들어달라고 하기",
         concept: [
           "이제 진짜 자동화를 해볼 거예요!",
           "Claude Code에게 웹페이지를 만들어달라고 해보세요.",
@@ -173,12 +197,13 @@ export const courses: Course[] = [
         mission: "자기소개 웹페이지를 만들어달라고 하세요",
         hints: [
           "'내 자기소개 웹페이지를 만들어줘' 라고 입력",
-          "이름, 취미, 좋아하는 것 등을 포함해달라고 해보세요",
-          "Claude가 HTML 파일을 만들어줄 거예요",
+          "이름, 취미 등을 포함해달라고 해보세요",
+          "Claude가 코드를 짜고 파일을 만들어요",
+          "Y를 눌러서 파일 생성을 허용하세요",
         ],
       },
       {
-        id: 11,
+        id: 12,
         title: "웹페이지 확인하기",
         concept: [
           "Claude가 만든 HTML 파일을 브라우저에서 열어봐요.",
@@ -187,24 +212,25 @@ export const courses: Course[] = [
         ],
         mission: "만든 HTML 파일을 브라우저에서 열어보세요",
         hints: [
-          "탐색기에서 autowork 폴더 열기",
-          "index.html 파일 더블클릭",
+          "바탕화면의 autowork 폴더 열기",
+          "index.html (또는 .html 파일) 더블클릭",
+          "브라우저에서 페이지가 열리면 성공!",
           "수정하고 싶으면 Claude에게 말하세요",
         ],
       },
       {
-        id: 12,
+        id: 13,
         title: "축하합니다! 🎉",
         concept: [
           "첫 번째 자동화를 완료했어요!",
           "이제 Claude Code의 기본 사용법을 알게 됐습니다.",
-          "다음 코스에서는 Gmail 자동화를 배워볼 거예요.",
+          "워크샵에서는 Gmail 자동화, 더 복잡한 프로젝트를 배워요.",
         ],
-        mission: "워크샵에서 더 깊이 배워보세요!",
+        mission: "오프라인 워크샵에서 더 깊이 배워보세요!",
         hints: [
-          "Gmail API 연동",
-          "이메일 자동 정리",
+          "Gmail API 연동으로 이메일 자동 정리",
           "반복 업무 자동화",
+          "실제 업무에 적용하는 팁",
         ],
       },
     ],

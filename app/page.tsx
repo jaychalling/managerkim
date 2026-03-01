@@ -43,6 +43,12 @@ export default function Home() {
               가이드
             </Link>
             <Link
+              href="/tools"
+              className="text-gray-600 hover:text-primary font-medium transition"
+            >
+              도구
+            </Link>
+            <Link
               href="/vps"
               className="text-gray-600 hover:text-primary font-medium transition"
             >

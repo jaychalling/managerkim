@@ -53,20 +53,20 @@ export default function SurveyPage() {
 
   if (submitted) {
     return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
+      <main className="min-h-screen bg-base flex items-center justify-center px-6">
         <div className="max-w-md w-full text-center">
-          <div className="w-20 h-20 bg-accent rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="w-20 h-20 bg-accent rounded-md flex items-center justify-center mx-auto mb-6">
             <CheckCircle size={40} className="text-white" />
           </div>
-          <h1 className="text-3xl font-extrabold text-gray-900 mb-4">감사합니다! 🙏</h1>
-          <p className="text-gray-600 text-lg leading-relaxed mb-6">
+          <h1 className="text-3xl font-extrabold text-heading mb-4">감사합니다!</h1>
+          <p className="text-body text-lg leading-relaxed mb-6">
             소중한 의견 잘 받았습니다.<br />
             여러분의 답변을 바탕으로<br />
-            <strong className="text-gray-900">맞춤 강의를 만들어 연락드릴게요</strong> ✨
+            <strong className="text-heading">맞춤 강의를 만들어 연락드릴게요</strong>
           </p>
           <a
             href="/"
-            className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition"
+            className="inline-flex items-center gap-2 bg-accent text-white px-6 py-3 rounded-md font-semibold hover:bg-accent-dark transition"
           >
             홈으로 <ChevronRight size={18} />
           </a>
@@ -76,25 +76,25 @@ export default function SurveyPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 py-16 px-6">
+    <main className="min-h-screen bg-base py-16 px-6">
       <div className="max-w-xl mx-auto">
         <div className="text-center mb-10">
-          <span className="inline-block bg-accent/10 text-accent font-semibold px-4 py-1 rounded-full text-sm mb-4">
+          <span className="inline-block text-accent font-semibold text-xs uppercase tracking-[0.15em] mb-4">
             워크샵 후기
           </span>
-          <h1 className="text-3xl font-extrabold text-gray-900 mb-2">
-            2분이면 됩니다 🙌
+          <h1 className="text-3xl font-extrabold text-heading mb-2">
+            2분이면 됩니다
           </h1>
-          <p className="text-gray-500">
+          <p className="text-caption">
             여러분의 답변이 다음 강의를 만듭니다
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Q1: 만족도 */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <p className="font-bold text-gray-900 mb-4">
-              1. 오늘 강의 전체 만족도는요? <span className="text-red-500">*</span>
+          <div className="bg-elevated rounded-card p-6 border border-border-subtle">
+            <p className="font-bold text-heading mb-4">
+              1. 오늘 강의 전체 만족도는요? <span className="text-accent">*</span>
             </p>
             <div className="flex gap-2 justify-center">
               {[1, 2, 3, 4, 5].map((n) => (
@@ -110,23 +110,23 @@ export default function SurveyPage() {
                     size={40}
                     className={
                       n <= (hovered || rating)
-                        ? "fill-amber-400 text-amber-400"
-                        : "text-gray-200"
+                        ? "fill-accent text-accent"
+                        : "text-border-default"
                     }
                   />
                 </button>
               ))}
             </div>
             {rating > 0 && (
-              <p className="text-center text-sm text-gray-400 mt-2">
+              <p className="text-center text-sm text-caption mt-2">
                 {["", "아쉬웠어요", "조금 아쉬웠어요", "보통이에요", "좋았어요", "완전 좋았어요!"][rating]}
               </p>
             )}
           </div>
 
           {/* Q2: 가장 도움이 된 내용 */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <p className="font-bold text-gray-900 mb-3">
+          <div className="bg-elevated rounded-card p-6 border border-border-subtle">
+            <p className="font-bold text-heading mb-3">
               2. 가장 도움이 된 내용은요?
             </p>
             <textarea
@@ -134,32 +134,32 @@ export default function SurveyPage() {
               onChange={(e) => setHelpful(e.target.value)}
               placeholder="예: Gmail 자동화, 터미널 사용법, 프롬프트 작성법..."
               rows={3}
-              className="w-full border border-gray-200 rounded-xl p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="w-full border border-border-default bg-subtle/30 rounded-md p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-accent/30"
             />
           </div>
 
           {/* Q3: 아쉬웠던 점 */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <p className="font-bold text-gray-900 mb-3">
+          <div className="bg-elevated rounded-card p-6 border border-border-subtle">
+            <p className="font-bold text-heading mb-3">
               3. 아쉬웠던 점이 있다면?{" "}
-              <span className="text-gray-400 font-normal text-sm">(선택)</span>
+              <span className="text-caption font-normal text-sm">(선택)</span>
             </p>
             <textarea
               value={improvement}
               onChange={(e) => setImprovement(e.target.value)}
-              placeholder="솔직하게 적어주세요. 다음 강의에 반영할게요 🙏"
+              placeholder="솔직하게 적어주세요. 다음 강의에 반영할게요"
               rows={3}
-              className="w-full border border-gray-200 rounded-xl p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="w-full border border-border-default bg-subtle/30 rounded-md p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-accent/30"
             />
           </div>
 
           {/* Q4: 다음에 배우고 싶은 것 */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <p className="font-bold text-gray-900 mb-1">
+          <div className="bg-elevated rounded-card p-6 border border-border-subtle">
+            <p className="font-bold text-heading mb-1">
               4. 다음에 어떤 자동화가 필요하세요?
             </p>
-            <p className="text-sm text-gray-400 mb-4">
-              선택한 주제로 강의를 만들어 연락드릴게요 ✨
+            <p className="text-sm text-caption mb-4">
+              선택한 주제로 강의를 만들어 연락드릴게요
             </p>
             <div className="grid grid-cols-2 gap-2 mb-4">
               {NEXT_TOPICS.map((t) => (
@@ -167,10 +167,10 @@ export default function SurveyPage() {
                   key={t.value}
                   type="button"
                   onClick={() => toggleTopic(t.value)}
-                  className={`text-left px-4 py-3 rounded-xl border-2 text-sm font-medium transition ${
+                  className={`text-left px-4 py-3 rounded-md border-2 text-sm font-medium transition ${
                     nextTopics.includes(t.value)
-                      ? "border-accent bg-accent/10 text-accent"
-                      : "border-gray-200 text-gray-600 hover:border-gray-300"
+                      ? "border-accent bg-accent-light text-accent"
+                      : "border-border-subtle text-body hover:border-border-default"
                   }`}
                 >
                   {t.label}
@@ -181,31 +181,31 @@ export default function SurveyPage() {
               value={nextTopicsOther}
               onChange={(e) => setNextTopicsOther(e.target.value)}
               placeholder="기타 — 직접 입력 (예: Slack 알림 자동화)"
-              className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="w-full border border-border-default bg-subtle/30 rounded-md p-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
             />
           </div>
 
           {/* Q5: 연락처 */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <p className="font-bold text-gray-900 mb-1">
+          <div className="bg-elevated rounded-card p-6 border border-border-subtle">
+            <p className="font-bold text-heading mb-1">
               5. 연락처{" "}
-              <span className="text-gray-400 font-normal text-sm">(선택)</span>
+              <span className="text-caption font-normal text-sm">(선택)</span>
             </p>
-            <p className="text-sm text-gray-400 mb-4">
+            <p className="text-sm text-caption mb-4">
               맞춤 강의가 완성되면 가장 먼저 알려드릴게요
             </p>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="이름"
-              className="w-full border border-gray-200 rounded-xl p-3 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="w-full border border-border-default bg-subtle/30 rounded-md p-3 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-accent/30"
             />
             <input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="이메일 주소"
               type="email"
-              className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="w-full border border-border-default bg-subtle/30 rounded-md p-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
             />
           </div>
 
@@ -216,12 +216,12 @@ export default function SurveyPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary text-white py-4 rounded-full text-lg font-bold hover:bg-blue-700 transition disabled:opacity-50"
+            className="w-full bg-accent text-white py-4 rounded-md text-lg font-bold hover:bg-accent-dark transition disabled:opacity-50"
           >
             {loading ? "제출 중..." : "제출하기 →"}
           </button>
 
-          <p className="text-center text-xs text-gray-400">
+          <p className="text-center text-xs text-caption">
             수집된 정보는 강의 개선 및 후속 안내에만 사용됩니다
           </p>
         </form>

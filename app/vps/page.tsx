@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Server,
   Clock,
@@ -7,18 +8,27 @@ import {
   Shield,
   Check,
   ArrowRight,
-  Home,
   Bot,
   Terminal,
-  HardDrive,
-  Cpu,
   Globe,
+  Cpu,
+  HardDrive,
   MessageCircle,
+  X,
 } from "lucide-react";
 import Link from "next/link";
+import NavBar from "@/components/ui/NavBar";
+import Footer from "@/components/ui/Footer";
+import SectionBadge from "@/components/ui/SectionBadge";
+import CtaBanner from "@/components/ui/CtaBanner";
 
 export default function VPSPage() {
-  const kakaoUrl = "#"; // 카카오톡 오픈채팅 링크
+  const [toast, setToast] = useState(false);
+
+  const showToast = () => {
+    setToast(true);
+    setTimeout(() => setToast(false), 2500);
+  };
 
   const plans = [
     {
@@ -77,82 +87,42 @@ export default function VPSPage() {
   ];
 
   const presets = [
-    {
-      icon: Bot,
-      name: "Ollama",
-      desc: "로컬 AI 모델 실행",
-    },
-    {
-      icon: Terminal,
-      name: "Docker",
-      desc: "컨테이너 환경 구성",
-    },
-    {
-      icon: Globe,
-      name: "Playwright",
-      desc: "헤드리스 브라우저",
-    },
-    {
-      icon: Zap,
-      name: "Python 3.12",
-      desc: "자동화 스크립트 실행",
-    },
+    { icon: Bot, name: "Ollama", desc: "로컬 AI 모델 실행" },
+    { icon: Terminal, name: "Docker", desc: "컨테이너 환경 구성" },
+    { icon: Globe, name: "Playwright", desc: "헤드리스 브라우저" },
+    { icon: Zap, name: "Python 3.12", desc: "자동화 스크립트 실행" },
   ];
 
   return (
-    <main className="min-h-screen bg-white text-gray-900">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-b border-gray-100 z-50">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="font-bold text-xl text-gray-900">
-            Manager<span className="text-primary">Kim</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/learn"
-              className="text-gray-600 hover:text-primary font-medium transition"
-            >
-              무료 학습
-            </Link>
-            <a
-              href={kakaoUrl}
-              className="bg-primary text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition cursor-pointer"
-            >
-              상담하기
-            </a>
-          </div>
-        </div>
-      </header>
+    <main className="min-h-screen bg-base">
+      <NavBar />
 
       {/* Hero */}
-      <section className="pt-32 pb-20 px-6">
+      <section className="pt-36 pb-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
-            <Server size={16} />
-            AI-Ready VPS
-          </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight mb-6">
+          <SectionBadge>AI-Ready VPS</SectionBadge>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-heading tracking-heading leading-tight mt-6 mb-6">
             만든 자동화,
             <br />
-            <span className="text-primary">24시간</span> 돌리세요
+            <span className="text-accent">24시간</span> 돌리세요
           </h1>
-          <p className="text-xl text-gray-600 leading-relaxed mb-10">
+          <p className="text-xl text-body leading-relaxed mb-10">
             PC 끄면 멈추는 자동화?
             <br />
-            VPS에 올리면 <strong className="text-gray-900">잠자는 동안에도</strong>{" "}
+            VPS에 올리면 <strong className="text-heading">잠자는 동안에도</strong>{" "}
             일합니다.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a
               href="#plans"
-              className="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-blue-700 transition cursor-pointer"
+              className="inline-flex items-center gap-2 bg-accent text-white px-8 py-4 rounded-md text-lg font-bold hover:bg-accent-dark transition cursor-pointer"
             >
               요금제 보기
               <ArrowRight size={20} />
             </a>
             <Link
               href="/learn"
-              className="inline-flex items-center gap-2 border border-gray-300 text-gray-700 px-8 py-4 rounded-full text-lg font-medium hover:bg-gray-50 transition"
+              className="inline-flex items-center gap-2 border border-heading text-heading px-8 py-4 rounded-md text-lg font-medium hover:bg-heading hover:text-white transition"
             >
               먼저 자동화 배우기
             </Link>
@@ -161,14 +131,17 @@ export default function VPSPage() {
       </section>
 
       {/* Why VPS */}
-      <section className="py-20 px-6 bg-gray-50">
+      <section className="py-20 px-6 bg-subtle">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-4">
-            왜 VPS가 필요한가요?
-          </h2>
-          <p className="text-gray-500 text-center mb-12">
-            워크샵에서 만든 자동화, 이대로 끝내기 아깝잖아요
-          </p>
+          <div className="text-center mb-12">
+            <SectionBadge>왜 VPS인가</SectionBadge>
+            <h2 className="text-3xl font-extrabold text-heading tracking-heading mt-4 mb-2">
+              왜 VPS가 필요한가요?
+            </h2>
+            <p className="text-caption">
+              만든 자동화, 이대로 끝내기 아깝잖아요
+            </p>
+          </div>
 
           <div className="grid md:grid-cols-2 gap-6">
             {[
@@ -195,14 +168,14 @@ export default function VPSPage() {
             ].map((item, i) => (
               <div
                 key={i}
-                className="flex gap-4 bg-white p-6 rounded-2xl border border-gray-200"
+                className="flex gap-4 bg-white p-6 rounded-card"
               >
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <item.icon size={24} className="text-primary" />
+                <div className="w-12 h-12 bg-subtle rounded-lg flex items-center justify-center flex-shrink-0">
+                  <item.icon size={24} className="text-heading" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-1">{item.title}</h3>
-                  <p className="text-gray-500">{item.desc}</p>
+                  <h3 className="text-lg font-bold text-heading mb-1">{item.title}</h3>
+                  <p className="text-caption">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -213,24 +186,27 @@ export default function VPSPage() {
       {/* Presets */}
       <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-4">
-            AI-Ready 프리셋
-          </h2>
-          <p className="text-gray-500 text-center mb-12">
-            복잡한 설치 없이, 바로 사용 가능한 환경
-          </p>
+          <div className="text-center mb-12">
+            <SectionBadge>프리셋</SectionBadge>
+            <h2 className="text-3xl font-extrabold text-heading tracking-heading mt-4 mb-2">
+              AI-Ready 프리셋
+            </h2>
+            <p className="text-caption">
+              복잡한 설치 없이, 바로 사용 가능한 환경
+            </p>
+          </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {presets.map((preset, i) => (
               <div
                 key={i}
-                className="bg-gray-50 border border-gray-200 rounded-2xl p-6 text-center"
+                className="bg-subtle rounded-card p-6 text-center"
               >
-                <div className="w-14 h-14 bg-accent/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <preset.icon size={28} className="text-accent" />
+                <div className="w-14 h-14 bg-white rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <preset.icon size={28} className="text-heading" />
                 </div>
-                <h3 className="font-bold text-gray-900 mb-1">{preset.name}</h3>
-                <p className="text-sm text-gray-500">{preset.desc}</p>
+                <h3 className="font-bold text-heading mb-1">{preset.name}</h3>
+                <p className="text-sm text-caption">{preset.desc}</p>
               </div>
             ))}
           </div>
@@ -238,51 +214,54 @@ export default function VPSPage() {
       </section>
 
       {/* Plans */}
-      <section id="plans" className="py-20 px-6 bg-gray-50">
+      <section id="plans" className="py-20 px-6 bg-subtle">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-4">요금제</h2>
-          <p className="text-gray-500 text-center mb-12">
-            업무 자동화 수강생 전용 특가
-          </p>
+          <div className="text-center mb-12">
+            <SectionBadge>요금제</SectionBadge>
+            <h2 className="text-3xl font-extrabold text-heading tracking-heading mt-4 mb-2">
+              요금제
+            </h2>
+            <p className="text-caption">업무 자동화 수강생 전용 특가</p>
+          </div>
 
           <div className="grid md:grid-cols-3 gap-6">
             {plans.map((plan, i) => (
               <div
                 key={i}
-                className={`relative bg-white rounded-2xl p-6 border-2 ${
+                className={`relative bg-white rounded-card p-6 border-2 ${
                   plan.recommended
-                    ? "border-primary shadow-lg"
-                    : "border-gray-200"
+                    ? "border-accent shadow-lg"
+                    : "border-border-subtle"
                 }`}
               >
                 {plan.recommended && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-bold px-4 py-1 rounded-full">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-white text-xs font-bold px-4 py-1 rounded-md">
                     추천
                   </div>
                 )}
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                <h3 className="text-xl font-bold text-heading mb-2">{plan.name}</h3>
                 <div className="mb-6">
-                  <span className="text-4xl font-extrabold text-gray-900">
+                  <span className="text-4xl font-extrabold text-heading">
                     {plan.price}
                   </span>
-                  <span className="text-gray-500">원/월</span>
+                  <span className="text-caption">원/월</span>
                 </div>
 
-                <div className="space-y-2 mb-6 pb-6 border-b border-gray-100">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Cpu size={16} className="text-gray-400" />
+                <div className="space-y-2 mb-6 pb-6 border-b border-border-subtle">
+                  <div className="flex items-center gap-2 text-sm text-body">
+                    <Cpu size={16} className="text-caption" />
                     <span>{plan.specs.cpu}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <HardDrive size={16} className="text-gray-400" />
+                  <div className="flex items-center gap-2 text-sm text-body">
+                    <HardDrive size={16} className="text-caption" />
                     <span>{plan.specs.ram}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Server size={16} className="text-gray-400" />
+                  <div className="flex items-center gap-2 text-sm text-body">
+                    <Server size={16} className="text-caption" />
                     <span>{plan.specs.storage}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Globe size={16} className="text-gray-400" />
+                  <div className="flex items-center gap-2 text-sm text-body">
+                    <Globe size={16} className="text-caption" />
                     <span>{plan.specs.traffic}</span>
                   </div>
                 </div>
@@ -294,21 +273,21 @@ export default function VPSPage() {
                         size={16}
                         className="text-accent flex-shrink-0 mt-0.5"
                       />
-                      <span className="text-gray-600">{feature}</span>
+                      <span className="text-body">{feature}</span>
                     </li>
                   ))}
                 </ul>
 
-                <a
-                  href={kakaoUrl}
-                  className={`block w-full text-center py-3 rounded-xl font-semibold transition cursor-pointer ${
+                <button
+                  onClick={showToast}
+                  className={`block w-full text-center py-3 rounded-md font-semibold transition cursor-pointer ${
                     plan.recommended
-                      ? "bg-primary text-white hover:bg-blue-700"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ? "bg-accent text-white hover:bg-accent-dark"
+                      : "bg-subtle text-heading hover:bg-muted"
                   }`}
                 >
                   {plan.cta}
-                </a>
+                </button>
               </div>
             ))}
           </div>
@@ -318,9 +297,12 @@ export default function VPSPage() {
       {/* Use Cases */}
       <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-12">
-            이런 자동화를 24시간 돌리세요
-          </h2>
+          <div className="text-center mb-12">
+            <SectionBadge>활용 사례</SectionBadge>
+            <h2 className="text-3xl font-extrabold text-heading tracking-heading mt-4">
+              이런 자동화를 24시간 돌리세요
+            </h2>
+          </div>
 
           <div className="space-y-4">
             {[
@@ -343,14 +325,14 @@ export default function VPSPage() {
             ].map((item, i) => (
               <div
                 key={i}
-                className="flex items-center gap-4 bg-gray-50 border border-gray-200 p-5 rounded-2xl"
+                className="flex items-center gap-4 bg-subtle p-5 rounded-card"
               >
-                <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Check size={20} className="text-accent" />
+                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Check size={20} className="text-heading" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900">{item.title}</h3>
-                  <p className="text-sm text-gray-500">{item.desc}</p>
+                  <h3 className="font-bold text-heading">{item.title}</h3>
+                  <p className="text-sm text-caption">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -359,40 +341,45 @@ export default function VPSPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 px-6 bg-gray-50">
+      <section className="py-20 px-6 bg-subtle">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <MessageCircle size={40} className="text-white" />
+          <div className="w-20 h-20 bg-subtle rounded-2xl flex items-center justify-center mx-auto mb-6 border border-border-subtle">
+            <MessageCircle size={40} className="text-heading" />
           </div>
-          <h2 className="text-3xl font-extrabold text-gray-900 mb-4">
+          <h2 className="text-3xl font-extrabold text-heading tracking-heading mb-4">
             궁금한 게 있으신가요?
           </h2>
-          <p className="text-xl text-gray-500 mb-8">
+          <p className="text-xl text-caption mb-8">
             카카오톡으로 편하게 문의하세요
             <br />
             자동화 상담도 함께 해드립니다
           </p>
-          <a
-            href={kakaoUrl}
-            className="inline-flex items-center gap-2 bg-[#FEE500] text-[#3C1E1E] px-10 py-5 rounded-full text-xl font-bold hover:bg-yellow-400 transition cursor-pointer"
+          <button
+            onClick={showToast}
+            className="inline-flex items-center gap-2 bg-[#FEE500] text-[#3C1E1E] px-10 py-5 rounded-md text-xl font-bold hover:bg-yellow-400 transition cursor-pointer"
           >
             카카오톡 상담하기
-          </a>
+          </button>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-10 px-6 border-t border-gray-100">
-        <div className="max-w-3xl mx-auto text-center">
-          <p className="font-bold text-gray-900 mb-2">
-            Manager<span className="text-primary">Kim</span>
-          </p>
-          <p className="text-gray-500 text-sm">업무 자동화하는 회사원 김과장</p>
-          <p className="text-gray-400 text-xs mt-4">
-            © 2026 ManagerKim. All rights reserved.
-          </p>
+      {/* Toast */}
+      {toast && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={() => setToast(false)}>
+          <div className="bg-white rounded-card p-8 shadow-xl max-w-sm mx-4 text-center" onClick={(e) => e.stopPropagation()}>
+            <p className="text-2xl font-extrabold text-heading mb-2">준비중입니다</p>
+            <p className="text-caption mb-6">곧 오픈 예정입니다. 조금만 기다려주세요!</p>
+            <button
+              onClick={() => setToast(false)}
+              className="bg-accent text-white px-6 py-2.5 rounded-md font-semibold hover:bg-accent-dark transition cursor-pointer"
+            >
+              확인
+            </button>
+          </div>
         </div>
-      </footer>
+      )}
+
+      <Footer />
     </main>
   );
 }

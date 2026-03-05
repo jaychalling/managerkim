@@ -156,7 +156,21 @@ function Invoke-RelayCommand {
     return @{ ExitCode = $exitCode; Output = $outputAll }
 }
 
-# ── Receive helper ──────────────────────────────────────────────
+# ── Persistent receive ──────────────────────────────────────────
+# Key insight: CancellationToken cancellation ABORTS the WebSocket.
+# Instead: start ReceiveAsync with no cancellation, use Task.Wait(ms)
+# to poll. Keep the task alive between calls.
+
+$script:_recvTask = $null
+$script:_recvBuffer = $null
+$script:_recvSegment = $null
+
+function Reset-ReceiveState {
+    $script:_recvTask = $null
+    $script:_recvBuffer = $null
+    $script:_recvSegment = $null
+}
+
 function Receive-WsMessage {
     param(
         [System.Net.WebSockets.ClientWebSocket]$Ws,
@@ -165,46 +179,46 @@ function Receive-WsMessage {
 
     if ($Ws.State -ne [System.Net.WebSockets.WebSocketState]::Open) { return $null }
 
-    $buffer = New-Object byte[] 65536
-    $segment = New-Object System.ArraySegment[byte] -ArgumentList (,$buffer)
-    $cts = New-Object System.Threading.CancellationTokenSource
-    $cts.CancelAfter($TimeoutMs)
+    # Start a new receive if none pending
+    if ($null -eq $script:_recvTask) {
+        $script:_recvBuffer = New-Object byte[] 65536
+        $script:_recvSegment = New-Object System.ArraySegment[byte] -ArgumentList (,$script:_recvBuffer)
+        $script:_recvTask = $Ws.ReceiveAsync($script:_recvSegment, [System.Threading.CancellationToken]::None)
+    }
+
+    # Poll: did it complete within timeout?
+    try {
+        $completed = $script:_recvTask.Wait($TimeoutMs)
+    }
+    catch {
+        # Connection broke
+        $inner = $_.Exception
+        while ($inner.InnerException) { $inner = $inner.InnerException }
+        Reset-ReceiveState
+        return @{ type = "__error"; message = $inner.Message }
+    }
+
+    if (-not $completed) {
+        # Still waiting — task stays alive for next call
+        return $null
+    }
+
+    # Task completed — read result, save buffer ref before reset
+    $result = $script:_recvTask.Result
+    $buf = $script:_recvBuffer
+    Reset-ReceiveState
+
+    if ($result.MessageType -eq [System.Net.WebSockets.WebSocketMessageType]::Close) {
+        return @{ type = "__close" }
+    }
+
+    $received = [System.Text.Encoding]::UTF8.GetString($buf, 0, $result.Count)
 
     try {
-        $task = $Ws.ReceiveAsync($segment, $cts.Token)
-        $task.Wait() | Out-Null
-        $result = $task.Result
-
-        if ($result.MessageType -eq [System.Net.WebSockets.WebSocketMessageType]::Close) {
-            $cts.Dispose()
-            return @{ type = "__close" }
-        }
-
-        $received = [System.Text.Encoding]::UTF8.GetString($buffer, 0, $result.Count)
-
-        while (-not $result.EndOfMessage) {
-            $task2 = $Ws.ReceiveAsync($segment, $cts.Token)
-            $task2.Wait() | Out-Null
-            $result = $task2.Result
-            $received += [System.Text.Encoding]::UTF8.GetString($buffer, 0, $result.Count)
-        }
-
-        $cts.Dispose()
         return ($received | ConvertFrom-Json)
     }
     catch {
-        $cts.Dispose()
-        # Unwrap through all layers: MethodInvocationException → AggregateException → actual
-        $inner = $_.Exception
-        while ($inner.InnerException) {
-            $inner = $inner.InnerException
-        }
-        # TaskCanceledException = normal timeout, not an error
-        if ($inner -is [System.Threading.Tasks.TaskCanceledException] -or
-            $inner -is [System.OperationCanceledException]) {
-            return $null
-        }
-        return @{ type = "__error"; message = $inner.Message }
+        return $null
     }
 }
 
@@ -212,6 +226,7 @@ function Receive-WsMessage {
 function Start-RelayClient {
     while ($true) {
         $ws = $null
+        Reset-ReceiveState
         try {
             Show-Status -SessionName $Name -Status "Connecting..."
 
@@ -232,19 +247,16 @@ function Start-RelayClient {
 
             Show-Status -SessionName $Name -Status "Waiting..."
 
-            # Message loop — errors here should NOT break the connection
-            $loopError = $false
-            while ($ws.State -eq [System.Net.WebSockets.WebSocketState]::Open -and -not $loopError) {
+            # Message loop
+            while ($ws.State -eq [System.Net.WebSockets.WebSocketState]::Open) {
                 try {
                     $msg = Receive-WsMessage -Ws $ws -TimeoutMs 2000
 
                     if ($null -eq $msg) { continue }
 
-                    if ($msg.type -eq "__close") { $loopError = $true; continue }
+                    if ($msg.type -eq "__close") { break }
                     if ($msg.type -eq "__error") {
-                        Write-Host "  Warning: $($msg.message)" -ForegroundColor Yellow
-                        $loopError = $true
-                        continue
+                        break
                     }
 
                     if ($msg.type -eq "registered") {
@@ -292,7 +304,6 @@ function Start-RelayClient {
                     }
                 }
                 catch {
-                    # Log but don't break the connection for transient errors
                     Write-Host "  Loop error: $($_.Exception.Message)" -ForegroundColor Yellow
                 }
             }
@@ -302,6 +313,7 @@ function Start-RelayClient {
             Write-Host "Connection error: $($_.Exception.Message)" -ForegroundColor Red
         }
         finally {
+            Reset-ReceiveState
             if ($ws) {
                 try {
                     $ws.Dispose()

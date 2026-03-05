@@ -1,12 +1,11 @@
-﻿# =============================================================================
-# AI 업무자동화 소셜링 — Windows 환경 설정 스크립트
+# =============================================================================
+# Easy클코 — Claude Code Windows 환경 자동 설치
 # =============================================================================
 #
-# 한 줄 실행 (PowerShell에 붙여넣기):
-#   irm https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/setup/install-windows.ps1 | iex
-#
-# 또는 로컬 실행:
-#   Set-ExecutionPolicy Bypass -Scope Process -Force; .\install-windows.ps1
+# 실행 방법:
+#   1. easy-clco-setup.bat 더블클릭 (권장)
+#   2. PowerShell 직접: Set-ExecutionPolicy Bypass -Scope Process -Force; .\install-windows.ps1
+#   3. 원격 실행: irm https://managerkim.com/downloads/install-windows.ps1 | iex
 #
 # 테스트 모드 (감지만, 설치 안 함):
 #   .\install-windows.ps1 --test
@@ -31,12 +30,12 @@ if ($args -contains "--test" -or $args -contains "--dry-run" -or $args -contains
 $script:Results = @{}
 $script:StepNumber = 0
 $script:TotalSteps = 7
-$script:WorkshopDir = Join-Path $env:USERPROFILE "workshop"
+$script:WorkspaceDir = Join-Path $env:USERPROFILE "claude-workspace"
 
 # --- 로그 파일 ---
-$script:LogFile = Join-Path $env:USERPROFILE "Desktop\workshop-install-log.txt"
+$script:LogFile = Join-Path $env:USERPROFILE "Desktop\easy-clco-install-log.txt"
 if (-not (Test-Path (Split-Path $script:LogFile))) {
-    $script:LogFile = Join-Path $env:USERPROFILE "workshop-install-log.txt"
+    $script:LogFile = Join-Path $env:USERPROFILE "easy-clco-install-log.txt"
 }
 
 # =============================================================================
@@ -51,7 +50,7 @@ function Write-Log {
 
 function Write-SystemInfo {
     Write-Log "============================================"
-    Write-Log "AI 업무자동화 소셜링 — 환경 설정 로그"
+    Write-Log "Easy클코 — 설치 로그"
     Write-Log "============================================"
     Write-Log "실행 시각: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
     Write-Log "테스트 모드: $($script:TestMode)"
@@ -77,14 +76,14 @@ function Show-Header {
     Write-Host ""
     Write-Host "  ╔══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
     Write-Host "  ║                                                        ║" -ForegroundColor Cyan
-    Write-Host "  ║     AI 업무자동화 소셜링 — 환경 설정                   ║" -ForegroundColor Cyan
+    Write-Host "  ║     Easy클코 — Claude Code 환경 자동 설치              ║" -ForegroundColor Cyan
     Write-Host "  ║                                                        ║" -ForegroundColor Cyan
     Write-Host "  ║     Git · Claude Code · Node.js · WezTerm              ║" -ForegroundColor Cyan
     Write-Host "  ║                                                        ║" -ForegroundColor Cyan
     Write-Host "  ╚══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
     Write-Host ""
     if ($script:TestMode) {
-        Write-Host "  🧪 테스트 모드 — 감지만 수행하고 설치하지 않습니다" -ForegroundColor Magenta
+        Write-Host "  테스트 모드 — 감지만 수행하고 설치하지 않습니다" -ForegroundColor Magenta
     } else {
         Write-Host "  총 ${script:TotalSteps}단계를 진행합니다. 잠시만 기다려 주세요..." -ForegroundColor Gray
     }
@@ -138,7 +137,6 @@ function Get-TempFilePath {
 }
 
 function Find-WezTermExe {
-    # WezTerm은 직접 경로 또는 하위 버전 폴더에 설치될 수 있음
     $searchDirs = @(
         "C:\Program Files\WezTerm",
         "C:\Program Files (x86)\WezTerm",
@@ -175,7 +173,6 @@ function Install-Git {
         $ver = & git --version 2>$null
         Write-Status "Git 이미 설치됨: $ver" -Type Success
 
-        # Git Bash 경로 확인
         $gitBashExe = "C:\Program Files\Git\bin\bash.exe"
         if (Test-Path $gitBashExe) {
             Write-Status "Git Bash 확인: $gitBashExe" -Type Success
@@ -267,7 +264,6 @@ function Install-ClaudeCode {
         $ver = & claude --version 2>$null
         Write-Status "Claude Code 이미 설치됨: $ver" -Type Success
 
-        # 설치 방식 감지
         $claudePath = (Get-Command "claude" -ErrorAction SilentlyContinue).Source
         if ($claudePath -like "*\.local\bin\*") {
             Write-Status "설치 방식: 네이티브 (자동 업데이트)" -Type Info
@@ -280,7 +276,7 @@ function Install-ClaudeCode {
         return
     }
 
-    # 네이티브 바이너리 경로 확인 (PATH에 없어도 설치되어 있을 수 있음)
+    # 네이티브 바이너리 경로 확인
     $nativePath = Join-Path $env:USERPROFILE ".local\bin\claude.exe"
     if (Test-Path $nativePath) {
         $localBinDir = Split-Path $nativePath
@@ -296,7 +292,6 @@ function Install-ClaudeCode {
 
     if ($script:TestMode) {
         Write-Status "[테스트 모드] 설치를 건너뜁니다." -Type Info
-        # 진단 정보
         Write-Status "[테스트 모드] 네이티브 경로 ($nativePath): $(Test-Path $nativePath)" -Type Info
         Write-Status "[테스트 모드] winget 사용 가능: $(Test-CommandExists 'winget')" -Type Info
         $npmAvail = Test-CommandExists "npm"
@@ -316,7 +311,6 @@ function Install-ClaudeCode {
         $installScript = Invoke-RestMethod -Uri "https://claude.ai/install.ps1" -UseBasicParsing -ErrorAction Stop
         Invoke-Expression $installScript
         Update-PathEnvironment
-        # 네이티브 바이너리 경로 추가
         $localBinDir = Join-Path $env:USERPROFILE ".local\bin"
         if (Test-Path $localBinDir) {
             $env:Path = "$localBinDir;$env:Path"
@@ -376,15 +370,14 @@ function Install-ClaudeCode {
 }
 
 # =============================================================================
-# Step 3: Node.js (선택 — 실습 프로젝트에 필요할 수 있음)
+# Step 3: Node.js (선택)
 # =============================================================================
 
 function Install-NodeJS {
-    Show-Step "Node.js 설치 확인 (실습용, 선택)"
+    Show-Step "Node.js 설치 확인 (선택)"
 
     if (Test-CommandExists "node") {
         $ver = & node --version 2>$null
-        # Node 18+ 확인
         $major = [int]($ver -replace "v(\d+)\..*", '$1')
         if ($major -ge 18) {
             Write-Status "Node.js 이미 설치됨: $ver" -Type Success
@@ -395,7 +388,7 @@ function Install-NodeJS {
         return
     }
 
-    Write-Status "Node.js가 없습니다. (Claude Code 실행에는 불필요, 일부 실습에 필요)" -Type Info
+    Write-Status "Node.js가 없습니다. (Claude Code에는 불필요, 일부 프로젝트에 필요)" -Type Info
 
     if ($script:TestMode) {
         Write-Status "[테스트 모드] 설치를 건너뜁니다." -Type Info
@@ -439,7 +432,7 @@ function Install-NodeJS {
             Remove-Item $msiPath -Force -ErrorAction SilentlyContinue
         } catch {
             Write-Status "MSI 설치도 실패했습니다: $_" -Type Error
-            $script:Results["Node.js"] = "❌ 설치 실패 (실습 일부 제한)"
+            $script:Results["Node.js"] = "❌ 설치 실패"
             return
         }
     }
@@ -532,7 +525,7 @@ function Install-WezTerm {
     Update-PathEnvironment
     Start-Sleep -Seconds 2
 
-    $weztermExe = $weztermPaths | Where-Object { Test-Path $_ } | Select-Object -First 1
+    $weztermExe = Find-WezTermExe
     if ($weztermExe -or (Test-CommandExists "wezterm")) {
         Write-Status "WezTerm 설치 완료" -Type Success
         $script:Results["WezTerm"] = "✅ 설치 완료"
@@ -543,25 +536,25 @@ function Install-WezTerm {
 }
 
 # =============================================================================
-# Step 5: Workshop 폴더 생성
+# Step 5: 작업 폴더 생성
 # =============================================================================
 
-function New-WorkshopFolder {
-    Show-Step "워크샵 폴더 생성"
+function New-WorkspaceFolder {
+    Show-Step "작업 폴더 생성"
 
-    if (Test-Path $script:WorkshopDir) {
-        Write-Status "워크샵 폴더 이미 존재: $($script:WorkshopDir)" -Type Success
-        $script:Results["Workshop 폴더"] = "✅ 이미 존재"
+    if (Test-Path $script:WorkspaceDir) {
+        Write-Status "작업 폴더 이미 존재: $($script:WorkspaceDir)" -Type Success
+        $script:Results["작업 폴더"] = "✅ 이미 존재"
         return
     }
 
     try {
-        New-Item -ItemType Directory -Path $script:WorkshopDir -Force | Out-Null
-        Write-Status "워크샵 폴더 생성 완료: $($script:WorkshopDir)" -Type Success
-        $script:Results["Workshop 폴더"] = "✅ 생성 완료"
+        New-Item -ItemType Directory -Path $script:WorkspaceDir -Force | Out-Null
+        Write-Status "작업 폴더 생성 완료: $($script:WorkspaceDir)" -Type Success
+        $script:Results["작업 폴더"] = "✅ 생성 완료"
     } catch {
-        Write-Status "워크샵 폴더 생성 실패: $_" -Type Error
-        $script:Results["Workshop 폴더"] = "❌ 생성 실패"
+        Write-Status "작업 폴더 생성 실패: $_" -Type Error
+        $script:Results["작업 폴더"] = "❌ 생성 실패"
     }
 }
 
@@ -617,7 +610,6 @@ function Set-PermanentPath {
     if (Test-CommandExists "npm") {
         try {
             $npmPrefix = (& npm.cmd config get prefix 2>$null) | Select-Object -First 1
-            # 유효한 경로인지 검증
             if ($npmPrefix -and (Test-Path $npmPrefix -ErrorAction SilentlyContinue)) {
                 if (($userPath -notlike "*$npmPrefix*") -and ($machinePath -notlike "*$npmPrefix*")) {
                     $pathsToAdd += $npmPrefix
@@ -631,7 +623,7 @@ function Set-PermanentPath {
         }
     }
 
-    # 5) WezTerm (버전 하위 폴더 포함)
+    # 5) WezTerm
     $weztermFound = Find-WezTermExe
     if ($weztermFound) {
         $weztermDir = Split-Path $weztermFound
@@ -686,8 +678,8 @@ function Set-PermanentPath {
 # Step 7: 검증 및 실행
 # =============================================================================
 
-function Start-Workshop {
-    Show-Step "검증 및 워크샵 환경 실행"
+function Start-Verification {
+    Show-Step "검증 및 환경 실행"
 
     # --- claude doctor 검증 ---
     if ((Test-CommandExists "claude") -and (-not $script:TestMode)) {
@@ -732,10 +724,10 @@ function Start-Workshop {
     $launched = $false
 
     if ($weztermExe) {
-        Write-Status "WezTerm으로 워크샵 환경을 엽니다..." -Type Progress
+        Write-Status "WezTerm으로 Claude Code를 시작합니다..." -Type Progress
         try {
             Start-Process -FilePath $weztermExe `
-                -ArgumentList "start","--cwd",$script:WorkshopDir,"--","claude" `
+                -ArgumentList "start","--cwd",$script:WorkspaceDir,"--","claude" `
                 -ErrorAction Stop
             Write-Status "WezTerm 실행 완료." -Type Success
             $launched = $true
@@ -752,10 +744,10 @@ function Start-Workshop {
         $gitBash = $gitBashPaths | Where-Object { Test-Path $_ } | Select-Object -First 1
 
         if ($gitBash) {
-            Write-Status "Git Bash로 워크샵 환경을 엽니다..." -Type Progress
+            Write-Status "Git Bash로 Claude Code를 시작합니다..." -Type Progress
             try {
                 Start-Process -FilePath $gitBash `
-                    -ArgumentList "--cd=$($script:WorkshopDir)","-c","claude; exec bash" `
+                    -ArgumentList "--cd=$($script:WorkspaceDir)","-c","claude; exec bash" `
                     -ErrorAction Stop
                 Write-Status "Git Bash 실행 완료." -Type Success
                 $launched = $true
@@ -769,7 +761,7 @@ function Start-Workshop {
         Write-Status "터미널을 자동 실행하지 못했습니다." -Type Warning
         Write-Status "아래 명령어를 직접 실행해 주세요:" -Type Info
         Write-Host ""
-        Write-Host "    cd $($script:WorkshopDir)" -ForegroundColor Yellow
+        Write-Host "    cd $($script:WorkspaceDir)" -ForegroundColor Yellow
         Write-Host "    claude" -ForegroundColor Yellow
         Write-Host ""
         $script:Results["검증/실행"] = "⚠️ 수동 실행 필요"
@@ -792,7 +784,7 @@ function Show-Summary {
     Write-Host ""
 
     $failCount = 0
-    foreach ($key in @("Git", "Claude Code", "Node.js", "WezTerm", "Workshop 폴더", "환경변수", "검증/실행")) {
+    foreach ($key in @("Git", "Claude Code", "Node.js", "WezTerm", "작업 폴더", "환경변수", "검증/실행")) {
         $status = $script:Results[$key]
         if (-not $status) { $status = "⏭️  건너뜀" }
 
@@ -810,26 +802,26 @@ function Show-Summary {
 
     if ($failCount -eq 0) {
         Write-Host ""
-        Write-Host "  🎉 모든 설정이 완료되었습니다!" -ForegroundColor Green
-        Write-Host "  워크샵 폴더: $($script:WorkshopDir)" -ForegroundColor Gray
+        Write-Host "  모든 설정이 완료되었습니다!" -ForegroundColor Green
+        Write-Host "  작업 폴더: $($script:WorkspaceDir)" -ForegroundColor Gray
         Write-Host ""
     } else {
         Write-Host ""
         Write-Host "  ⚠️  $failCount 개 항목이 실패했습니다." -ForegroundColor Yellow
         Write-Host "  실패한 항목은 수동으로 설치해 주세요." -ForegroundColor Yellow
         Write-Host ""
-        Write-Host "  도움이 필요하면 워크샵 진행자에게 문의하세요." -ForegroundColor Gray
+        Write-Host "  도움이 필요하면 managerkim.com을 방문하세요." -ForegroundColor Gray
         Write-Host ""
     }
 
-    Write-Host "  워크샵에서 만나요! 👋" -ForegroundColor Cyan
+    Write-Host "  Happy coding!" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "  📄 전체 로그: $($script:LogFile)" -ForegroundColor DarkGray
+    Write-Host "  전체 로그: $($script:LogFile)" -ForegroundColor DarkGray
     Write-Host ""
 
     Write-Log ""
     Write-Log "========== 최종 결과 =========="
-    foreach ($key in @("Git", "Claude Code", "Node.js", "WezTerm", "Workshop 폴더", "환경변수", "검증/실행")) {
+    foreach ($key in @("Git", "Claude Code", "Node.js", "WezTerm", "작업 폴더", "환경변수", "검증/실행")) {
         $status = $script:Results[$key]
         if (-not $status) { $status = "건너뜀" }
         Write-Log "  $key : $status"
@@ -846,7 +838,7 @@ function Main {
     Write-SystemInfo
 
     Show-Header
-    Write-Host "  📄 로그 파일: $($script:LogFile)" -ForegroundColor DarkGray
+    Write-Host "  로그 파일: $($script:LogFile)" -ForegroundColor DarkGray
     Write-Host ""
 
     $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
@@ -862,9 +854,9 @@ function Main {
     Install-ClaudeCode    # 2. Claude Code (네이티브 우선)
     Install-NodeJS        # 3. Node.js (선택)
     Install-WezTerm       # 4. WezTerm (선택)
-    New-WorkshopFolder    # 5. 폴더
+    New-WorkspaceFolder   # 5. 작업 폴더
     Set-PermanentPath     # 6. 환경변수
-    Start-Workshop        # 7. 검증 + 실행
+    Start-Verification    # 7. 검증 + 실행
     Show-Summary
 }
 

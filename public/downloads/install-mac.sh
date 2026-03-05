@@ -1,15 +1,15 @@
 #!/bin/bash
 # =============================================================================
-# AI 업무자동화 소셜링 — Mac 환경 설정 스크립트
+# Easy클코 — Claude Code Mac 환경 자동 설치
 #
-# 사용법 (원라인 설치):
-#   curl -fsSL https://raw.githubusercontent.com/<OWNER>/<REPO>/main/setup/install-mac.sh | bash
+# 사용법:
+#   bash ~/Downloads/install-mac.sh
 #
-# 또는 로컬 실행:
-#   chmod +x install-mac.sh && ./install-mac.sh
+# 또는 원격 실행:
+#   curl -fsSL https://managerkim.com/downloads/install-mac.sh | bash
 #
 # 테스트 모드 (감지만, 설치 안 함):
-#   ./install-mac.sh --test
+#   bash install-mac.sh --test
 #
 # =============================================================================
 
@@ -28,8 +28,8 @@ done
 # ---------------------------------------------------------------------------
 # 로그 파일
 # ---------------------------------------------------------------------------
-LOG_FILE="$HOME/Desktop/workshop-install-log.txt"
-[ -d "$HOME/Desktop" ] || LOG_FILE="$HOME/workshop-install-log.txt"
+LOG_FILE="$HOME/Desktop/easy-clco-install-log.txt"
+[ -d "$HOME/Desktop" ] || LOG_FILE="$HOME/easy-clco-install-log.txt"
 
 write_log() {
     local ts
@@ -39,7 +39,7 @@ write_log() {
 
 write_system_info() {
     echo "============================================" > "$LOG_FILE"
-    write_log "AI 업무자동화 소셜링 — 환경 설정 로그"
+    write_log "Easy클코 — 설치 로그"
     write_log "============================================"
     write_log "실행 시각: $(date '+%Y-%m-%d %H:%M:%S')"
     write_log "테스트 모드: $TEST_MODE"
@@ -82,15 +82,15 @@ write_system_info
 echo ""
 echo -e "${BOLD}${BLUE}╔══════════════════════════════════════════════════════════╗${NC}"
 echo -e "${BOLD}${BLUE}║                                                          ║${NC}"
-echo -e "${BOLD}${BLUE}║        AI 업무자동화 소셜링 — 환경 설정                  ║${NC}"
+echo -e "${BOLD}${BLUE}║        Easy클코 — Claude Code 환경 자동 설치             ║${NC}"
 echo -e "${BOLD}${BLUE}║                                                          ║${NC}"
 echo -e "${BOLD}${BLUE}║   Git · Claude Code · Homebrew · Node.js                 ║${NC}"
 echo -e "${BOLD}${BLUE}║                                                          ║${NC}"
 echo -e "${BOLD}${BLUE}╚══════════════════════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "  📄 로그 파일: ${CYAN}$LOG_FILE${NC}"
+echo -e "  로그 파일: ${CYAN}$LOG_FILE${NC}"
 if [ "$TEST_MODE" = true ]; then
-    echo -e "  ${MAGENTA}🧪 테스트 모드 — 감지만 수행하고 설치하지 않습니다${NC}"
+    echo -e "  ${MAGENTA}테스트 모드 — 감지만 수행하고 설치하지 않습니다${NC}"
 fi
 echo ""
 
@@ -230,7 +230,7 @@ fi
 echo ""
 
 # ===========================================================================
-# 3단계: Homebrew (Node.js 등 패키지 관리용)
+# 3단계: Homebrew (패키지 관리)
 # ===========================================================================
 echo -e "${BOLD}[3/7] Homebrew 확인 (패키지 관리)${NC}"
 
@@ -254,9 +254,9 @@ fi
 echo ""
 
 # ===========================================================================
-# 4단계: Node.js (선택 — 실습 프로젝트에 필요할 수 있음)
+# 4단계: Node.js (선택)
 # ===========================================================================
-echo -e "${BOLD}[4/7] Node.js 확인 (실습용, 선택)${NC}"
+echo -e "${BOLD}[4/7] Node.js 확인 (선택)${NC}"
 
 if command -v node &>/dev/null; then
     NODE_VER=$(node --version)
@@ -270,7 +270,7 @@ elif [ "$TEST_MODE" = true ]; then
     step_test "[테스트 모드] Node.js 미설치 — 설치를 건너뜁니다"
     step_test "[테스트 모드] brew 사용 가능: $(command -v brew &>/dev/null && echo 'Yes' || echo 'No')"
 else
-    step_info "Node.js가 없습니다. (Claude Code 실행에는 불필요, 일부 실습에 필요)"
+    step_info "Node.js가 없습니다. (Claude Code에는 불필요, 일부 프로젝트에 필요)"
     step_wait "Node.js 설치 중... (brew install node)"
     if command -v brew &>/dev/null; then
         if brew install node; then
@@ -302,19 +302,19 @@ step_info "더 나은 환경을 원하시면 iTerm2 추천: https://iterm2.com"
 echo ""
 
 # ===========================================================================
-# 6단계: 워크샵 폴더 생성
+# 6단계: 작업 폴더 생성
 # ===========================================================================
-echo -e "${BOLD}[6/7] 워크샵 폴더 생성${NC}"
+echo -e "${BOLD}[6/7] 작업 폴더 생성${NC}"
 
-WORKSHOP_DIR="$HOME/workshop"
+WORKSPACE_DIR="$HOME/claude-workspace"
 
-if [ -d "$WORKSHOP_DIR" ]; then
-    step_ok "워크샵 폴더가 이미 존재합니다 ($WORKSHOP_DIR)"
+if [ -d "$WORKSPACE_DIR" ]; then
+    step_ok "작업 폴더가 이미 존재합니다 ($WORKSPACE_DIR)"
 else
-    if mkdir -p "$WORKSHOP_DIR"; then
-        step_ok "워크샵 폴더 생성 완료 ($WORKSHOP_DIR)"
+    if mkdir -p "$WORKSPACE_DIR"; then
+        step_ok "작업 폴더 생성 완료 ($WORKSPACE_DIR)"
     else
-        step_fail "워크샵 폴더 생성 실패"
+        step_fail "작업 폴더 생성 실패"
     fi
 fi
 echo ""
@@ -337,10 +337,13 @@ fi
 
 step_info "쉘 설정 파일: $SHELL_RC"
 
-MARKER="# [WORKSHOP-PATH-SETUP]"
+MARKER="# [EASY-CLCO-PATH-SETUP]"
 PATHS_ADDED=0
 
-if grep -q "$MARKER" "$SHELL_RC" 2>/dev/null; then
+# 이전 마커도 확인 (기존 설치 호환)
+OLD_MARKER="# [WORKSHOP-PATH-SETUP]"
+
+if grep -q "$MARKER" "$SHELL_RC" 2>/dev/null || grep -q "$OLD_MARKER" "$SHELL_RC" 2>/dev/null; then
     step_ok "PATH 설정이 이미 추가되어 있습니다 ($SHELL_RC)"
 else
     PATH_BLOCK=""
@@ -400,7 +403,7 @@ else
         {
             echo ""
             echo "$MARKER"
-            echo "# AI 업무자동화 소셜링 — 자동 추가된 PATH 설정"
+            echo "# Easy클코 — 자동 추가된 PATH 설정"
             echo -e "$PATH_BLOCK"
         } >> "$SHELL_RC"
 
@@ -431,7 +434,7 @@ fi
 # 최종 요약
 # ===========================================================================
 echo -e "${BOLD}${BLUE}══════════════════════════════════════════════════════════${NC}"
-echo -e "${BOLD}  📋 설치 결과 요약${NC}"
+echo -e "${BOLD}  설치 결과 요약${NC}"
 echo -e "${BOLD}${BLUE}══════════════════════════════════════════════════════════${NC}"
 echo ""
 
@@ -475,16 +478,16 @@ if [ ${#ERRORS[@]} -gt 0 ]; then
     echo ""
     echo -e "${YELLOW}위 문제를 해결한 뒤 스크립트를 다시 실행해 주세요.${NC}"
     echo ""
-    echo -e "  📄 전체 로그: ${CYAN}$LOG_FILE${NC}"
+    echo -e "  전체 로그: ${CYAN}$LOG_FILE${NC}"
     echo ""
 else
-    echo -e "${GREEN}${BOLD}🎉 모든 설치가 완료되었습니다!${NC}"
+    echo -e "${GREEN}${BOLD}모든 설치가 완료되었습니다!${NC}"
     echo ""
-    echo -e "${BOLD}  다음 명령어로 워크샵을 시작하세요:${NC}"
+    echo -e "${BOLD}  다음 명령어로 Claude Code를 시작하세요:${NC}"
     echo ""
-    echo -e "    ${CYAN}cd ~/workshop && claude${NC}"
+    echo -e "    ${CYAN}cd ~/claude-workspace && claude${NC}"
     echo ""
-    echo -e "  📄 전체 로그: ${CYAN}$LOG_FILE${NC}"
+    echo -e "  전체 로그: ${CYAN}$LOG_FILE${NC}"
     echo ""
 
     # Claude Code 자동 실행
@@ -493,10 +496,10 @@ else
         read -r -t 10 REPLY || REPLY="n"
         echo ""
         if [[ "$REPLY" =~ ^[Yy]?$ ]]; then
-            cd "$WORKSHOP_DIR"
+            cd "$WORKSPACE_DIR"
             exec claude
         else
-            echo -e "${CYAN}나중에 실행하려면:  cd ~/workshop && claude${NC}"
+            echo -e "${CYAN}나중에 실행하려면:  cd ~/claude-workspace && claude${NC}"
             echo ""
         fi
     fi

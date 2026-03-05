@@ -96,8 +96,8 @@ const installItems = [
   },
   {
     icon: FolderOpen,
-    name: "Workshop 폴더",
-    desc: "~/workshop 실습 디렉토리 자동 생성",
+    name: "작업 폴더",
+    desc: "~/claude-workspace 작업 디렉토리 자동 생성",
   },
   {
     icon: ShieldCheck,
@@ -126,7 +126,7 @@ const faqItems = [
   {
     question: "설치 중 오류가 나면 어떻게 하나요?",
     answer:
-      "바탕화면에 생성되는 workshop-install-log.txt 파일에 상세 로그가 기록됩니다. 이 파일을 강사에게 보내주시면 바로 도움드립니다.",
+      "바탕화면에 생성되는 easy-clco-install-log.txt 파일에 상세 로그가 기록됩니다. 로그 파일을 확인하면 문제 원인을 파악할 수 있습니다.",
   },
   {
     question: "다시 실행해도 괜찮나요?",
@@ -170,14 +170,14 @@ export default function SetupPage() {
   const downloadUrl =
     detectedOS === "mac"
       ? "/downloads/install-mac.sh"
-      : "/downloads/install-windows.ps1";
+      : "/downloads/easy-clco-setup.bat";
 
   const downloadLabel =
     detectedOS === "mac" ? "Mac용 다운로드" : "Windows용 다운로드";
 
   const altUrl =
     detectedOS === "mac"
-      ? "/downloads/install-windows.ps1"
+      ? "/downloads/easy-clco-setup.bat"
       : "/downloads/install-mac.sh";
 
   const altLabel =
@@ -418,9 +418,9 @@ export default function SetupPage() {
                 </div>
                 <ol className="space-y-4">
                   {[
-                    "다운로드된 install-windows.ps1 파일을 찾습니다",
-                    "파일을 마우스 오른쪽 클릭합니다",
-                    "\"PowerShell에서 실행\"을 선택합니다",
+                    "다운로드된 easy-clco-setup.bat 파일을 찾습니다",
+                    "파일을 더블클릭합니다",
+                    "파란 보안 경고가 뜨면 '추가 정보' → '실행'을 클릭합니다",
                     "설치가 자동으로 진행됩니다",
                   ].map((text, i) => (
                     <li key={i} className="flex items-start gap-3 text-sm">

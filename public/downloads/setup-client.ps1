@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  managerkim-setup PowerShell client — Node.js 없이 릴레이 서버에 연결
+  managerkim-setup PowerShell client
 .DESCRIPTION
   .NET ClientWebSocket으로 VPS 릴레이 서버(1664)에 연결하여
   강사의 원격 명령을 받아 실행하고 결과를 스트리밍합니다.
@@ -9,7 +9,6 @@
 .EXAMPLE
   .\setup-client.ps1
   .\setup-client.ps1 -Name "학생-1"
-  .\setup-client.ps1 -Name "학생-1" -RelayUrl "ws://38.45.67.130:1664/ws"
 #>
 
 param(
@@ -22,22 +21,22 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 # ── Console UI ──────────────────────────────────────────────────
-$SEP = [string]::new([char]0x2500, 45)
+$SEP = "---------------------------------------------"
 
 function Show-Status {
     param([string]$SessionName, [string]$Status)
     Clear-Host
     Write-Host $SEP
     Write-Host "  managerkim-setup v1.0 (PowerShell)"
-    Write-Host "  연결: $($RelayUrl -replace 'ws://','')"
-    Write-Host "  세션: $SessionName"
-    Write-Host "  상태: $Status"
+    Write-Host "  server: $($RelayUrl -replace 'ws://','')"
+    Write-Host "  session: $SessionName"
+    Write-Host "  status: $Status"
     Write-Host $SEP
     foreach ($entry in $script:LogBuffer) {
         Write-Host "  $($entry.Icon) $($entry.Text)"
     }
     Write-Host $SEP
-    Write-Host "  Ctrl+C로 종료"
+    Write-Host "  Ctrl+C to quit"
 }
 
 function Get-Timestamp {
@@ -46,23 +45,49 @@ function Get-Timestamp {
 
 # ── Prompt for name ─────────────────────────────────────────────
 if (-not $Name) {
-    $Name = Read-Host "이름을 입력하세요 (예: 학생-1)"
+    $Name = Read-Host "Enter your name (e.g. student-1)"
     if ([string]::IsNullOrWhiteSpace($Name)) {
-        $Name = "학생-$(Get-Date -Format 'fff')"
+        $Name = "student-$(Get-Date -Format 'fff')"
     }
 }
 
-$script:LogBuffer = [System.Collections.ArrayList]::new()
+$script:LogBuffer = New-Object System.Collections.ArrayList
 
 # ── Admin check ─────────────────────────────────────────────────
 try {
     $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
     $principal = New-Object Security.Principal.WindowsPrincipal($identity)
     if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-        Write-Host "⚠️  관리자 권한 없이 실행 중. 일부 설치가 실패할 수 있습니다." -ForegroundColor Yellow
+        Write-Host "Warning: not running as admin. Some installs may fail." -ForegroundColor Yellow
         Start-Sleep -Seconds 1
     }
-} catch {}
+}
+catch {
+    # ignore
+}
+
+# ── WebSocket helpers (defined before Invoke-RelayCommand) ──────
+function Send-WsMessage {
+    param(
+        [System.Net.WebSockets.ClientWebSocket]$Ws,
+        [hashtable]$Message
+    )
+
+    if ($Ws.State -ne [System.Net.WebSockets.WebSocketState]::Open) { return }
+
+    $jsonStr = $Message | ConvertTo-Json -Compress -Depth 5
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($jsonStr)
+    $segment = New-Object System.ArraySegment[byte] -ArgumentList (,$bytes)
+    $token = [System.Threading.CancellationToken]::None
+
+    try {
+        $task = $Ws.SendAsync($segment, [System.Net.WebSockets.WebSocketMessageType]::Text, $true, $token)
+        $task.GetAwaiter().GetResult() | Out-Null
+    }
+    catch {
+        # ignore send errors
+    }
+}
 
 # ── Execute command ─────────────────────────────────────────────
 function Invoke-RelayCommand {
@@ -76,10 +101,12 @@ function Invoke-RelayCommand {
     $exitCode = 1
 
     try {
-        # Start the process
         $psi = New-Object System.Diagnostics.ProcessStartInfo
         $psi.FileName = "powershell.exe"
-        $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -Command `"$($Command -replace '"','\"')`""
+        # Encode command as Base64 to avoid quoting issues
+        $cmdBytes = [System.Text.Encoding]::Unicode.GetBytes($Command)
+        $cmdB64 = [Convert]::ToBase64String($cmdBytes)
+        $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -EncodedCommand $cmdB64"
         $psi.UseShellExecute = $false
         $psi.RedirectStandardOutput = $true
         $psi.RedirectStandardError = $true
@@ -89,24 +116,28 @@ function Invoke-RelayCommand {
 
         $proc = [System.Diagnostics.Process]::Start($psi)
 
-        # Read stdout in chunks
         while (-not $proc.StandardOutput.EndOfStream) {
             $line = $proc.StandardOutput.ReadLine()
             if ($null -ne $line) {
-                $text = "$line`n"
+                $text = $line + "`n"
                 $outputAll += $text
                 Send-WsMessage -Ws $Ws -Message @{
-                    type = "output"; id = $Id; stream = "stdout"; data = $text
+                    type = "output"
+                    id = $Id
+                    stream = "stdout"
+                    data = $text
                 }
             }
         }
 
-        # Read stderr
         $stderr = $proc.StandardError.ReadToEnd()
         if ($stderr) {
             $outputAll += $stderr
             Send-WsMessage -Ws $Ws -Message @{
-                type = "output"; id = $Id; stream = "stderr"; data = $stderr
+                type = "output"
+                id = $Id
+                stream = "stderr"
+                data = $stderr
             }
         }
 
@@ -117,7 +148,10 @@ function Invoke-RelayCommand {
         $errText = "Error: $($_.Exception.Message)`n"
         $outputAll += $errText
         Send-WsMessage -Ws $Ws -Message @{
-            type = "output"; id = $Id; stream = "stderr"; data = $errText
+            type = "output"
+            id = $Id
+            stream = "stderr"
+            data = $errText
         }
         $exitCode = 1
     }
@@ -125,35 +159,17 @@ function Invoke-RelayCommand {
     return @{ ExitCode = $exitCode; Output = $outputAll }
 }
 
-# ── WebSocket helpers ───────────────────────────────────────────
-function Send-WsMessage {
-    param(
-        [System.Net.WebSockets.ClientWebSocket]$Ws,
-        [hashtable]$Message
-    )
-
-    if ($Ws.State -ne [System.Net.WebSockets.WebSocketState]::Open) { return }
-
-    $jsonStr = $Message | ConvertTo-Json -Compress -Depth 5
-    $bytes = [System.Text.Encoding]::UTF8.GetBytes($jsonStr)
-    $segment = New-Object System.ArraySegment[byte] -ArgumentList @(,$bytes)
-    $token = [System.Threading.CancellationToken]::None
-
-    try {
-        $Ws.SendAsync($segment, [System.Net.WebSockets.WebSocketMessageType]::Text, $true, $token).GetAwaiter().GetResult() | Out-Null
-    } catch {}
-}
-
+# ── Receive helper ──────────────────────────────────────────────
 function Receive-WsMessage {
     param(
         [System.Net.WebSockets.ClientWebSocket]$Ws,
-        [int]$TimeoutMs = 1000
+        [int]$TimeoutMs = 2000
     )
 
     if ($Ws.State -ne [System.Net.WebSockets.WebSocketState]::Open) { return $null }
 
     $buffer = New-Object byte[] 65536
-    $segment = New-Object System.ArraySegment[byte] -ArgumentList @(,$buffer)
+    $segment = New-Object System.ArraySegment[byte] -ArgumentList (,$buffer)
     $cts = New-Object System.Threading.CancellationTokenSource
     $cts.CancelAfter($TimeoutMs)
 
@@ -161,27 +177,27 @@ function Receive-WsMessage {
         $result = $Ws.ReceiveAsync($segment, $cts.Token).GetAwaiter().GetResult()
 
         if ($result.MessageType -eq [System.Net.WebSockets.WebSocketMessageType]::Close) {
+            $cts.Dispose()
             return @{ type = "__close" }
         }
 
         $received = [System.Text.Encoding]::UTF8.GetString($buffer, 0, $result.Count)
 
-        # Handle multi-frame messages
         while (-not $result.EndOfMessage) {
             $result = $Ws.ReceiveAsync($segment, $cts.Token).GetAwaiter().GetResult()
             $received += [System.Text.Encoding]::UTF8.GetString($buffer, 0, $result.Count)
         }
 
-        return $received | ConvertFrom-Json
+        $cts.Dispose()
+        return ($received | ConvertFrom-Json)
     }
     catch [System.OperationCanceledException] {
-        return $null  # Timeout, no message
+        $cts.Dispose()
+        return $null
     }
     catch {
-        return @{ type = "__error"; message = $_.Exception.Message }
-    }
-    finally {
         $cts.Dispose()
+        return @{ type = "__error"; message = $_.Exception.Message }
     }
 }
 
@@ -190,7 +206,7 @@ function Start-RelayClient {
     while ($true) {
         $ws = $null
         try {
-            Show-Status -SessionName $Name -Status "🔌 연결 중..."
+            Show-Status -SessionName $Name -Status "Connecting..."
 
             $ws = New-Object System.Net.WebSockets.ClientWebSocket
             $ws.Options.KeepAliveInterval = [TimeSpan]::FromSeconds(30)
@@ -207,7 +223,7 @@ function Start-RelayClient {
                 nodeVersion = "powershell-$($PSVersionTable.PSVersion)"
             }
 
-            Show-Status -SessionName $Name -Status "⏳ 대기 중"
+            Show-Status -SessionName $Name -Status "Waiting..."
 
             # Message loop
             while ($ws.State -eq [System.Net.WebSockets.WebSocketState]::Open) {
@@ -217,31 +233,46 @@ function Start-RelayClient {
 
                 if ($msg.type -eq "__close") { break }
                 if ($msg.type -eq "__error") {
-                    Write-Host "  ⚠️ 수신 오류: $($msg.message)" -ForegroundColor Yellow
+                    Write-Host "  Warning: $($msg.message)" -ForegroundColor Yellow
                     break
                 }
 
                 if ($msg.type -eq "registered") {
-                    Show-Status -SessionName $Name -Status "⏳ 대기 중"
+                    Show-Status -SessionName $Name -Status "Waiting..."
                     continue
                 }
 
                 if ($msg.type -eq "exec") {
-                    $cmdShort = if ($msg.command.Length -gt 40) {
-                        $msg.command.Substring(0, 40) + "..."
-                    } else { $msg.command }
+                    # Shorten command for display
+                    $cmdShort = $msg.command
+                    if ($cmdShort.Length -gt 40) {
+                        $cmdShort = $cmdShort.Substring(0, 40) + "..."
+                    }
 
-                    Show-Status -SessionName $Name -Status "⚡ 실행 중"
-                    Write-Host "  📥 [$(Get-Timestamp)] $cmdShort"
+                    Show-Status -SessionName $Name -Status "Running..."
+                    Write-Host "  >> [$(Get-Timestamp)] $cmdShort"
 
                     $result = Invoke-RelayCommand -Id $msg.id -Command $msg.command -Ws $ws
 
-                    $icon = if ($result.ExitCode -eq 0) { "✅" } else { "❌" }
-                    $lastLine = ($result.Output.Trim() -split "`n")[-1]
-                    $resultShort = if ($lastLine.Length -gt 30) { $lastLine.Substring(0, 30) } else { $lastLine }
-                    if (-not $resultShort) { $resultShort = "exit $($result.ExitCode)" }
+                    # Result icon
+                    $icon = "X"
+                    if ($result.ExitCode -eq 0) { $icon = "OK" }
 
-                    $script:LogBuffer.Add(@{ Icon = "📥 [$(Get-Timestamp)]"; Text = $cmdShort }) | Out-Null
+                    # Last line of output for summary
+                    $resultShort = "exit $($result.ExitCode)"
+                    $trimmed = $result.Output.Trim()
+                    if ($trimmed.Length -gt 0) {
+                        $lines = $trimmed.Split("`n")
+                        $lastLine = $lines[$lines.Length - 1]
+                        if ($lastLine.Length -gt 30) {
+                            $resultShort = $lastLine.Substring(0, 30)
+                        }
+                        elseif ($lastLine.Length -gt 0) {
+                            $resultShort = $lastLine
+                        }
+                    }
+
+                    $script:LogBuffer.Add(@{ Icon = ">> [$(Get-Timestamp)]"; Text = $cmdShort }) | Out-Null
                     $script:LogBuffer.Add(@{ Icon = $icon; Text = $resultShort }) | Out-Null
 
                     Send-WsMessage -Ws $ws -Message @{
@@ -250,20 +281,26 @@ function Start-RelayClient {
                         exitCode = $result.ExitCode
                     }
 
-                    Show-Status -SessionName $Name -Status "⏳ 대기 중"
+                    Show-Status -SessionName $Name -Status "Waiting..."
                 }
             }
         }
         catch {
-            Write-Host "`n연결 오류: $($_.Exception.Message)" -ForegroundColor Red
+            Write-Host ""
+            Write-Host "Connection error: $($_.Exception.Message)" -ForegroundColor Red
         }
         finally {
             if ($ws) {
-                try { $ws.Dispose() } catch {}
+                try {
+                    $ws.Dispose()
+                }
+                catch {
+                    # ignore
+                }
             }
         }
 
-        Write-Host "3초 후 재연결..."
+        Write-Host "Reconnecting in 3 seconds..."
         Start-Sleep -Seconds 3
     }
 }
@@ -274,8 +311,9 @@ try {
 }
 catch {
     if ($_.Exception.GetType().Name -eq "PipelineStoppedException") {
-        Write-Host "`n종료합니다..."
-    } else {
+        Write-Host "`nExiting..."
+    }
+    else {
         throw
     }
 }

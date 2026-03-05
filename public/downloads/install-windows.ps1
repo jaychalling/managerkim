@@ -296,15 +296,20 @@ function Install-Git {
 
     Write-Status "설치를 시작합니다..." -Type Progress
 
-    # --- 방법 1: winget ---
+    # --- 방법 1: winget (3분 타임아웃) ---
     $installed = $false
     if (Test-CommandExists "winget") {
-        Write-Status "winget으로 Git 설치 시도..." -Type Progress
+        Write-Status "winget으로 Git 설치 시도 (최대 3분)..." -Type Progress
         try {
             $proc = Start-Process -FilePath "winget" `
                 -ArgumentList "install","Git.Git","--accept-source-agreements","--accept-package-agreements","--silent" `
-                -Wait -PassThru -NoNewWindow -ErrorAction SilentlyContinue
-            if ($proc.ExitCode -eq 0) { $installed = $true }
+                -PassThru -NoNewWindow -ErrorAction SilentlyContinue
+            if ($proc.WaitForExit(180000)) {
+                if ($proc.ExitCode -eq 0) { $installed = $true }
+            } else {
+                Write-Status "winget 타임아웃 (3분 초과) — 직접 다운로드로 전환합니다." -Type Warning
+                $proc | Stop-Process -Force -ErrorAction SilentlyContinue
+            }
         } catch {
             Write-Status "winget 설치 실패: $_" -Type Warning
         }
@@ -425,17 +430,22 @@ function Install-ClaudeCode {
         Write-Status "네이티브 인스톨러 실패: $_" -Type Warning
     }
 
-    # --- 방법 2: winget ---
+    # --- 방법 2: winget (3분 타임아웃) ---
     if (-not $nativeInstalled -and (Test-CommandExists "winget")) {
-        Write-Status "winget으로 설치 시도..." -Type Progress
+        Write-Status "winget으로 설치 시도 (최대 3분)..." -Type Progress
         try {
             $proc = Start-Process -FilePath "winget" `
                 -ArgumentList "install","Anthropic.ClaudeCode","--accept-source-agreements","--accept-package-agreements","--silent" `
-                -Wait -PassThru -NoNewWindow -ErrorAction SilentlyContinue
-            if ($proc.ExitCode -eq 0) {
-                Update-PathEnvironment
-                Start-Sleep -Seconds 2
-                if (Test-CommandExists "claude") { $nativeInstalled = $true }
+                -PassThru -NoNewWindow -ErrorAction SilentlyContinue
+            if ($proc.WaitForExit(180000)) {
+                if ($proc.ExitCode -eq 0) {
+                    Update-PathEnvironment
+                    Start-Sleep -Seconds 2
+                    if (Test-CommandExists "claude") { $nativeInstalled = $true }
+                }
+            } else {
+                Write-Status "winget 타임아웃 — 직접 다운로드로 전환합니다." -Type Warning
+                $proc | Stop-Process -Force -ErrorAction SilentlyContinue
             }
         } catch {
             Write-Status "winget 설치 실패: $_" -Type Warning
@@ -503,12 +513,17 @@ function Install-NodeJS {
     # --- 방법 1: winget ---
     $installed = $false
     if (Test-CommandExists "winget") {
-        Write-Status "winget으로 Node.js LTS 설치 시도..." -Type Progress
+        Write-Status "winget으로 Node.js LTS 설치 시도 (최대 3분)..." -Type Progress
         try {
             $proc = Start-Process -FilePath "winget" `
                 -ArgumentList "install","OpenJS.NodeJS.LTS","--accept-source-agreements","--accept-package-agreements","--silent" `
-                -Wait -PassThru -NoNewWindow -ErrorAction SilentlyContinue
-            if ($proc.ExitCode -eq 0) { $installed = $true }
+                -PassThru -NoNewWindow -ErrorAction SilentlyContinue
+            if ($proc.WaitForExit(180000)) {
+                if ($proc.ExitCode -eq 0) { $installed = $true }
+            } else {
+                Write-Status "winget 타임아웃 — 직접 다운로드로 전환합니다." -Type Warning
+                $proc | Stop-Process -Force -ErrorAction SilentlyContinue
+            }
         } catch {
             Write-Status "winget 설치 실패: $_" -Type Warning
         }
@@ -577,15 +592,20 @@ function Install-WezTerm {
 
     Write-Status "설치를 시작합니다..." -Type Progress
 
-    # --- 방법 1: winget ---
+    # --- 방법 1: winget (3분 타임아웃) ---
     $installed = $false
     if (Test-CommandExists "winget") {
-        Write-Status "winget으로 WezTerm 설치 시도..." -Type Progress
+        Write-Status "winget으로 WezTerm 설치 시도 (최대 3분)..." -Type Progress
         try {
             $proc = Start-Process -FilePath "winget" `
                 -ArgumentList "install","wez.wezterm","--accept-source-agreements","--accept-package-agreements","--silent" `
-                -Wait -PassThru -NoNewWindow -ErrorAction SilentlyContinue
-            if ($proc.ExitCode -eq 0) { $installed = $true }
+                -PassThru -NoNewWindow -ErrorAction SilentlyContinue
+            if ($proc.WaitForExit(180000)) {
+                if ($proc.ExitCode -eq 0) { $installed = $true }
+            } else {
+                Write-Status "winget 타임아웃 — 직접 다운로드로 전환합니다." -Type Warning
+                $proc | Stop-Process -Force -ErrorAction SilentlyContinue
+            }
         } catch {
             Write-Status "winget 설치 실패: $_" -Type Warning
         }

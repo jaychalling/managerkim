@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Lock, Terminal, Wifi, Monitor, ArrowRight, Copy, Check } from "lucide-react";
+import { Download, Lock, Terminal, Wifi, Monitor, ArrowRight, Copy, Check, MousePointer } from "lucide-react";
 import NavBar from "@/components/ui/NavBar";
 import Footer from "@/components/ui/Footer";
 
 const PASSWORD = "2026";
+const EASYCC_URL = "http://38.45.67.130:1664/download/easycc";
 
 function downloadBoth() {
   // First file
@@ -124,14 +125,14 @@ function StudentContent() {
               이게 뭔가요?
             </h2>
             <p className="text-body leading-relaxed mb-4">
-              워크샵 진행 중 강사가 여러분의 PC에 <strong className="text-heading">원격으로 프로그램을 설치</strong>해드리는 도구예요.
-              여러분은 이 프로그램만 실행하면 되고, 나머지는 강사가 알아서 진행합니다.
+              워크샵 진행 중 김과장님이 여러분의 PC에 <strong className="text-heading">원격으로 프로그램을 설치</strong>해드리는 도구예요.
+              여러분은 이 프로그램만 실행하면 되고, 나머지는 김과장님이 알아서 진행합니다.
             </p>
             <div className="grid sm:grid-cols-3 gap-4 mt-6">
               {[
-                { icon: Download, step: "01", title: "다운로드", desc: "아래 버튼으로 파일 받기" },
-                { icon: Terminal, step: "02", title: "실행", desc: "PowerShell에서 한 줄 입력" },
-                { icon: Monitor, step: "03", title: "대기", desc: "강사 지시 대기. 자동 설치됨" },
+                { icon: Download, step: "01", title: "다운로드", desc: "아래 버튼으로 EasyCC 받기" },
+                { icon: MousePointer, step: "02", title: "실행", desc: "압축 풀고 EasyCC.exe 실행" },
+                { icon: Monitor, step: "03", title: "대기", desc: "이름 입력 후 연결. 자동 설치됨" },
               ].map((item, i) => (
                 <div key={i} className="text-center bg-white rounded-xl p-4">
                   <div className="w-10 h-10 bg-subtle rounded-lg flex items-center justify-center mx-auto mb-2">
@@ -145,25 +146,26 @@ function StudentContent() {
             </div>
           </div>
 
-          {/* Download */}
+          {/* EasyCC Download */}
           <div className="bg-white rounded-card border-2 border-accent p-8 mb-8">
-            <h2 className="text-xl font-bold text-heading mb-6 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-heading mb-2 flex items-center gap-2">
               <Download size={22} className="text-accent" />
-              다운로드
+              EasyCC 다운로드
             </h2>
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              <button
-                onClick={downloadBoth}
-                className="inline-flex items-center gap-3 bg-accent text-white px-8 py-4 rounded-md text-lg font-bold hover:bg-accent-dark transition cursor-pointer"
+            <p className="text-sm text-caption mb-6">김과장님이 원격으로 도와주는 귀여운 도우미 프로그램</p>
+            <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+              <a
+                href={EASYCC_URL}
+                className="inline-flex items-center gap-3 bg-accent text-white px-8 py-4 rounded-md text-lg font-bold hover:bg-accent-dark transition"
               >
                 <Download size={20} />
-                다운로드 (2개 파일)
-              </button>
-              <span className="text-sm text-caption">Windows 전용 &middot; .bat과 .ps1 자동 다운로드</span>
+                EasyCC 다운로드
+              </a>
+              <span className="text-sm text-caption">Windows 전용 &middot; ZIP 파일 (약 111MB)</span>
             </div>
           </div>
 
-          {/* Instructions */}
+          {/* EasyCC Instructions */}
           <div className="bg-white rounded-card border border-border-subtle p-8 mb-8">
             <h2 className="text-xl font-bold text-heading mb-6 flex items-center gap-2">
               <Terminal size={22} className="text-accent" />
@@ -174,11 +176,10 @@ function StudentContent() {
               <li className="flex items-start gap-4">
                 <span className="w-7 h-7 bg-accent text-white rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold mt-0.5">1</span>
                 <div className="flex-1">
-                  <p className="font-semibold text-heading mb-2">다운로드된 파일 2개가 같은 폴더에 있는지 확인</p>
+                  <p className="font-semibold text-heading mb-2">다운로드된 ZIP 파일 압축 풀기</p>
                   <p className="text-sm text-body">
-                    <code className="bg-subtle px-1.5 py-0.5 rounded text-sm font-mono">setup-client.bat</code>과
-                    <code className="bg-subtle px-1.5 py-0.5 rounded text-sm font-mono">setup-client.ps1</code>이
-                    같은 폴더(보통 Downloads)에 있으면 됩니다.
+                    <code className="bg-subtle px-1.5 py-0.5 rounded text-sm font-mono">EasyCC.zip</code>을
+                    우클릭 &rarr; <strong>&ldquo;모두 압축 풀기&rdquo;</strong> 하세요.
                   </p>
                 </div>
               </li>
@@ -186,7 +187,7 @@ function StudentContent() {
               <li className="flex items-start gap-4">
                 <span className="w-7 h-7 bg-accent text-white rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold mt-0.5">2</span>
                 <div className="flex-1">
-                  <p className="font-semibold text-heading mb-2">setup-client.bat을 더블클릭</p>
+                  <p className="font-semibold text-heading mb-2">EasyCC.exe 더블클릭</p>
                   <p className="text-sm text-body mb-2">
                     파란 보안 경고가 뜨면 <strong>&ldquo;추가 정보&rdquo;</strong> &rarr; <strong>&ldquo;실행&rdquo;</strong>을 클릭하세요.
                   </p>
@@ -196,9 +197,10 @@ function StudentContent() {
               <li className="flex items-start gap-4">
                 <span className="w-7 h-7 bg-accent text-white rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold mt-0.5">3</span>
                 <div className="flex-1">
-                  <p className="font-semibold text-heading mb-2">이름을 입력하고 Enter</p>
+                  <p className="font-semibold text-heading mb-2">이름 입력 후 &ldquo;연결&rdquo; 클릭</p>
                   <p className="text-sm text-body mb-2">
-                    강사가 여러분을 구분할 이름을 입력하세요 (예: 김철수)
+                    김과장님이 여러분을 구분할 이름을 입력하세요 (예: 김철수).
+                    연결되면 화면에 <strong className="text-green-600">&ldquo;연결 완료!&rdquo;</strong>가 표시됩니다.
                   </p>
                 </div>
               </li>
@@ -206,44 +208,56 @@ function StudentContent() {
               <li className="flex items-start gap-4">
                 <span className="w-7 h-7 bg-accent text-white rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold mt-0.5">4</span>
                 <div className="flex-1">
-                  <p className="font-semibold text-heading mb-2">&ldquo;Waiting...&rdquo;이 나오면 완료</p>
-                  <div className="bg-[#1a1f36] rounded-lg p-4 font-mono text-sm text-gray-300">
-                    <pre className="whitespace-pre">{`---------------------------------------------
-  managerkim-setup v1.0 (PowerShell)
-  server: 38.45.67.130:1664/ws
-  session: 김철수
-  status: Waiting...
----------------------------------------------
-  Ctrl+C to quit`}</pre>
-                  </div>
-                  <p className="text-xs text-caption mt-2">
-                    이 화면이 나오면 강사의 지시를 기다리세요. 창을 닫지 마세요.
+                  <p className="font-semibold text-heading mb-2">창을 닫지 마세요!</p>
+                  <p className="text-sm text-body">
+                    EasyCC 창이 열려 있어야 김과장님이 원격으로 설정을 도와줄 수 있어요.
+                    진행 상황이 로그에 표시됩니다.
                   </p>
                 </div>
               </li>
             </ol>
           </div>
 
+          {/* Legacy PS client (collapsed) */}
+          <details className="bg-subtle rounded-card p-6 mb-8">
+            <summary className="font-bold text-heading cursor-pointer flex items-center gap-2">
+              <Terminal size={18} className="text-caption" />
+              PowerShell 클라이언트 (대안)
+            </summary>
+            <div className="mt-4 space-y-4">
+              <p className="text-sm text-caption">
+                EasyCC가 실행되지 않을 때 사용하는 대안입니다. 아래 파일 2개를 다운로드하고 .bat 파일을 더블클릭하세요.
+              </p>
+              <button
+                onClick={downloadBoth}
+                className="inline-flex items-center gap-2 bg-white border border-border-default text-heading px-4 py-2 rounded-md text-sm font-semibold hover:bg-subtle transition cursor-pointer"
+              >
+                <Download size={16} />
+                PS 클라이언트 다운로드 (2개 파일)
+              </button>
+            </div>
+          </details>
+
           {/* Troubleshooting */}
           <div className="bg-subtle rounded-card p-8">
             <h2 className="text-lg font-bold text-heading mb-4">문제가 생겼나요?</h2>
             <div className="space-y-4">
               <div>
-                <p className="font-semibold text-heading text-sm">실행 정책 오류가 나요</p>
+                <p className="font-semibold text-heading text-sm">보안 경고가 뜨면서 실행이 안 돼요</p>
                 <p className="text-sm text-caption">
-                  명령어 앞에 <code className="bg-white px-1.5 py-0.5 rounded text-xs font-mono">powershell -ExecutionPolicy Bypass -File</code>을 붙여서 실행하세요. 위 명령어를 그대로 복사하면 됩니다.
+                  &ldquo;Windows의 PC 보호&rdquo; 창에서 <strong>&ldquo;추가 정보&rdquo;</strong>를 클릭하면 &ldquo;실행&rdquo; 버튼이 나타납니다.
                 </p>
               </div>
               <div>
                 <p className="font-semibold text-heading text-sm">연결이 안 돼요</p>
                 <p className="text-sm text-caption">
-                  와이파이 연결을 확인하세요. 회사 VPN이 켜져 있으면 꺼보세요. 그래도 안 되면 강사에게 알려주세요.
+                  와이파이 연결을 확인하세요. 회사 VPN이 켜져 있으면 꺼보세요. 그래도 안 되면 김과장님에게 알려주세요.
                 </p>
               </div>
               <div>
-                <p className="font-semibold text-heading text-sm">빨간 글씨가 나와요</p>
+                <p className="font-semibold text-heading text-sm">&ldquo;연결이 끊어졌어요&rdquo;가 반복돼요</p>
                 <p className="text-sm text-caption">
-                  &quot;3초 후 재연결&quot; 메시지는 정상이에요. 자동으로 다시 연결을 시도합니다. 계속 반복되면 강사에게 알려주세요.
+                  자동으로 다시 연결을 시도합니다. 계속 반복되면 김과장님에게 알려주세요.
                 </p>
               </div>
             </div>

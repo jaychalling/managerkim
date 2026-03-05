@@ -6,9 +6,9 @@ import { getDocSection, docSections, DocTag } from "@/lib/docs";
 function TagBadge({ tag }: { tag?: DocTag }) {
   if (!tag) return null;
   const styles: Record<DocTag, string> = {
-    NEW: "bg-green-100 text-green-700 border border-green-200",
-    IMPROVED: "bg-blue-100 text-blue-700 border border-blue-200",
-    EXPERIMENTAL: "bg-amber-100 text-amber-700 border border-amber-200",
+    NEW: "bg-accent-light text-accent border border-accent/20",
+    IMPROVED: "bg-primary-lighter text-primary border border-primary-light/30",
+    EXPERIMENTAL: "bg-subtle text-body border border-border-default",
   };
   return (
     <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${styles[tag]}`}>
@@ -37,18 +37,18 @@ export default function DocDetailPage({
       : null;
 
   return (
-    <main className="min-h-screen bg-white text-gray-900">
+    <main className="min-h-screen bg-base">
       {/* Header */}
-      <header className="border-b border-gray-100 sticky top-0 bg-white/80 backdrop-blur-sm z-10">
+      <header className="border-b border-border-subtle sticky top-0 bg-elevated/80 backdrop-blur-md z-10">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link
             href="/docs"
-            className="flex items-center gap-2 text-gray-500 hover:text-primary transition"
+            className="flex items-center gap-2 text-caption hover:text-primary transition"
           >
             <ChevronLeft size={18} />
             <span className="text-sm">목록으로</span>
           </Link>
-          <Link href="/" className="text-gray-400 hover:text-primary transition">
+          <Link href="/" className="text-caption hover:text-primary transition">
             <Home size={18} />
           </Link>
         </div>
@@ -63,10 +63,12 @@ export default function DocDetailPage({
             <div className="flex items-center gap-2 mb-1">
               <TagBadge tag={section.tag} />
             </div>
-            <h1 className="text-3xl font-extrabold">{section.title}</h1>
+            <h1 className="text-3xl font-extrabold text-heading tracking-heading">
+              {section.title}
+            </h1>
           </div>
         </div>
-        <p className="text-gray-500 mt-3 mb-10 text-lg leading-relaxed">
+        <p className="text-body mt-3 mb-10 text-lg leading-relaxed">
           {section.summary}
         </p>
 
@@ -75,7 +77,7 @@ export default function DocDetailPage({
           {section.content.map((block, i) => {
             if (block.type === "desc") {
               return (
-                <p key={i} className="text-gray-600 text-lg leading-relaxed">
+                <p key={i} className="text-body text-lg leading-relaxed">
                   {block.text}
                 </p>
               );
@@ -84,14 +86,14 @@ export default function DocDetailPage({
               return (
                 <div
                   key={i}
-                  className="bg-gray-50 border border-gray-200 rounded-2xl p-5"
+                  className="bg-elevated border border-border-subtle rounded-card p-5"
                 >
                   {block.title && (
-                    <h3 className="font-bold text-gray-900 mb-3">
+                    <h3 className="font-bold text-heading mb-3">
                       {block.title}
                     </h3>
                   )}
-                  <p className="text-gray-600 whitespace-pre-line text-sm leading-relaxed">
+                  <p className="text-body whitespace-pre-line text-sm leading-relaxed">
                     {block.text}
                   </p>
                 </div>
@@ -101,10 +103,10 @@ export default function DocDetailPage({
               return (
                 <div
                   key={i}
-                  className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-3"
+                  className="bg-subtle border border-border-default rounded-card p-5 flex gap-3"
                 >
                   <span className="text-xl">💡</span>
-                  <p className="text-amber-800 text-sm leading-relaxed">
+                  <p className="text-body text-sm leading-relaxed">
                     {block.text}
                   </p>
                 </div>
@@ -114,14 +116,14 @@ export default function DocDetailPage({
               return (
                 <div
                   key={i}
-                  className="border-l-4 border-primary bg-primary/5 rounded-r-2xl p-5"
+                  className="border-l-4 border-primary bg-primary-lighter rounded-r-card-sm p-5"
                 >
                   {block.label && (
                     <p className="text-xs font-bold text-primary uppercase tracking-wide mb-2">
                       {block.label}
                     </p>
                   )}
-                  <p className="text-gray-700 whitespace-pre-line text-sm leading-relaxed">
+                  <p className="text-body whitespace-pre-line text-sm leading-relaxed">
                     {block.text}
                   </p>
                 </div>
@@ -131,11 +133,11 @@ export default function DocDetailPage({
               return (
                 <div
                   key={i}
-                  className="bg-gray-900 rounded-2xl overflow-hidden"
+                  className="bg-primary rounded-card overflow-hidden"
                 >
                   {block.title && (
-                    <div className="px-5 py-2 border-b border-gray-700">
-                      <span className="text-xs text-gray-400 font-medium">{block.title}</span>
+                    <div className="px-5 py-2 border-b border-white/10">
+                      <span className="text-xs text-primary-light font-medium">{block.title}</span>
                     </div>
                   )}
                   <pre className="p-5 overflow-x-auto text-sm">
@@ -148,14 +150,14 @@ export default function DocDetailPage({
               return (
                 <div
                   key={i}
-                  className="bg-gray-50 border border-gray-200 rounded-2xl p-5"
+                  className="bg-elevated border border-border-subtle rounded-card p-5"
                 >
                   {block.title && (
-                    <h3 className="font-bold text-gray-900 mb-3">{block.title}</h3>
+                    <h3 className="font-bold text-heading mb-3">{block.title}</h3>
                   )}
                   <ul className="space-y-2">
                     {block.items?.map((item, j) => (
-                      <li key={j} className="flex items-start gap-2 text-sm text-gray-600">
+                      <li key={j} className="flex items-start gap-2 text-sm text-body">
                         <span className="text-primary mt-0.5 flex-shrink-0">•</span>
                         <span className="leading-relaxed">{item}</span>
                       </li>
@@ -173,15 +175,15 @@ export default function DocDetailPage({
           {prev ? (
             <Link
               href={`/docs/${prev.slug}`}
-              className="flex-1 flex items-center gap-2 border border-gray-200 rounded-xl p-4 hover:border-primary hover:bg-gray-50 transition group"
+              className="flex-1 flex items-center gap-2 border border-border-subtle rounded-card-sm p-4 hover:border-primary-light hover:bg-elevated transition group"
             >
               <ChevronLeft
                 size={18}
-                className="text-gray-400 group-hover:text-primary flex-shrink-0"
+                className="text-caption group-hover:text-primary flex-shrink-0"
               />
               <div>
-                <p className="text-xs text-gray-400">이전</p>
-                <p className="font-medium text-gray-700 group-hover:text-primary text-sm">
+                <p className="text-xs text-caption">이전</p>
+                <p className="font-medium text-heading group-hover:text-primary text-sm">
                   {prev.title}
                 </p>
               </div>
@@ -192,17 +194,17 @@ export default function DocDetailPage({
           {next ? (
             <Link
               href={`/docs/${next.slug}`}
-              className="flex-1 flex items-center justify-end gap-2 border border-gray-200 rounded-xl p-4 hover:border-primary hover:bg-gray-50 transition group text-right"
+              className="flex-1 flex items-center justify-end gap-2 border border-border-subtle rounded-card-sm p-4 hover:border-primary-light hover:bg-elevated transition group text-right"
             >
               <div>
-                <p className="text-xs text-gray-400">다음</p>
-                <p className="font-medium text-gray-700 group-hover:text-primary text-sm">
+                <p className="text-xs text-caption">다음</p>
+                <p className="font-medium text-heading group-hover:text-primary text-sm">
                   {next.title}
                 </p>
               </div>
               <ChevronRight
                 size={18}
-                className="text-gray-400 group-hover:text-primary flex-shrink-0"
+                className="text-caption group-hover:text-primary flex-shrink-0"
               />
             </Link>
           ) : (

@@ -16,7 +16,6 @@ param(
     [string]$RelayUrl = "ws://38.45.67.130:1664/ws"
 )
 
-$ErrorActionPreference = "Stop"
 $OutputEncoding = [System.Text.Encoding]::UTF8
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
@@ -66,7 +65,7 @@ catch {
     # ignore
 }
 
-# ── WebSocket helpers (defined before Invoke-RelayCommand) ──────
+# ── WebSocket helpers ───────────────────────────────────────────
 function Send-WsMessage {
     param(
         [System.Net.WebSockets.ClientWebSocket]$Ws,
@@ -75,12 +74,11 @@ function Send-WsMessage {
 
     if ($Ws.State -ne [System.Net.WebSockets.WebSocketState]::Open) { return }
 
-    $jsonStr = $Message | ConvertTo-Json -Compress -Depth 5
-    $bytes = [System.Text.Encoding]::UTF8.GetBytes($jsonStr)
-    $segment = New-Object System.ArraySegment[byte] -ArgumentList (,$bytes)
-    $token = [System.Threading.CancellationToken]::None
-
     try {
+        $jsonStr = $Message | ConvertTo-Json -Compress -Depth 5
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes($jsonStr)
+        $segment = New-Object System.ArraySegment[byte] -ArgumentList (,$bytes)
+        $token = [System.Threading.CancellationToken]::None
         $task = $Ws.SendAsync($segment, [System.Net.WebSockets.WebSocketMessageType]::Text, $true, $token)
         $task.GetAwaiter().GetResult() | Out-Null
     }
@@ -103,7 +101,6 @@ function Invoke-RelayCommand {
     try {
         $psi = New-Object System.Diagnostics.ProcessStartInfo
         $psi.FileName = "powershell.exe"
-        # Encode command as Base64 to avoid quoting issues
         $cmdBytes = [System.Text.Encoding]::Unicode.GetBytes($Command)
         $cmdB64 = [Convert]::ToBase64String($cmdBytes)
         $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -EncodedCommand $cmdB64"
@@ -174,7 +171,9 @@ function Receive-WsMessage {
     $cts.CancelAfter($TimeoutMs)
 
     try {
-        $result = $Ws.ReceiveAsync($segment, $cts.Token).GetAwaiter().GetResult()
+        $task = $Ws.ReceiveAsync($segment, $cts.Token)
+        $task.Wait() | Out-Null
+        $result = $task.Result
 
         if ($result.MessageType -eq [System.Net.WebSockets.WebSocketMessageType]::Close) {
             $cts.Dispose()
@@ -184,20 +183,28 @@ function Receive-WsMessage {
         $received = [System.Text.Encoding]::UTF8.GetString($buffer, 0, $result.Count)
 
         while (-not $result.EndOfMessage) {
-            $result = $Ws.ReceiveAsync($segment, $cts.Token).GetAwaiter().GetResult()
+            $task2 = $Ws.ReceiveAsync($segment, $cts.Token)
+            $task2.Wait() | Out-Null
+            $result = $task2.Result
             $received += [System.Text.Encoding]::UTF8.GetString($buffer, 0, $result.Count)
         }
 
         $cts.Dispose()
         return ($received | ConvertFrom-Json)
     }
-    catch [System.OperationCanceledException] {
-        $cts.Dispose()
-        return $null
-    }
     catch {
         $cts.Dispose()
-        return @{ type = "__error"; message = $_.Exception.Message }
+        $inner = $_.Exception
+        # Unwrap AggregateException
+        if ($inner -is [System.AggregateException]) {
+            $inner = $inner.InnerException
+        }
+        # TaskCanceledException = normal timeout, not an error
+        if ($inner -is [System.Threading.Tasks.TaskCanceledException] -or
+            $inner -is [System.OperationCanceledException]) {
+            return $null
+        }
+        return @{ type = "__error"; message = $inner.Message }
     }
 }
 
@@ -225,63 +232,68 @@ function Start-RelayClient {
 
             Show-Status -SessionName $Name -Status "Waiting..."
 
-            # Message loop
-            while ($ws.State -eq [System.Net.WebSockets.WebSocketState]::Open) {
-                $msg = Receive-WsMessage -Ws $ws -TimeoutMs 2000
+            # Message loop — errors here should NOT break the connection
+            $loopError = $false
+            while ($ws.State -eq [System.Net.WebSockets.WebSocketState]::Open -and -not $loopError) {
+                try {
+                    $msg = Receive-WsMessage -Ws $ws -TimeoutMs 2000
 
-                if ($null -eq $msg) { continue }
+                    if ($null -eq $msg) { continue }
 
-                if ($msg.type -eq "__close") { break }
-                if ($msg.type -eq "__error") {
-                    Write-Host "  Warning: $($msg.message)" -ForegroundColor Yellow
-                    break
-                }
-
-                if ($msg.type -eq "registered") {
-                    Show-Status -SessionName $Name -Status "Waiting..."
-                    continue
-                }
-
-                if ($msg.type -eq "exec") {
-                    # Shorten command for display
-                    $cmdShort = $msg.command
-                    if ($cmdShort.Length -gt 40) {
-                        $cmdShort = $cmdShort.Substring(0, 40) + "..."
+                    if ($msg.type -eq "__close") { $loopError = $true; continue }
+                    if ($msg.type -eq "__error") {
+                        Write-Host "  Warning: $($msg.message)" -ForegroundColor Yellow
+                        $loopError = $true
+                        continue
                     }
 
-                    Show-Status -SessionName $Name -Status "Running..."
-                    Write-Host "  >> [$(Get-Timestamp)] $cmdShort"
+                    if ($msg.type -eq "registered") {
+                        Show-Status -SessionName $Name -Status "Waiting..."
+                        continue
+                    }
 
-                    $result = Invoke-RelayCommand -Id $msg.id -Command $msg.command -Ws $ws
-
-                    # Result icon
-                    $icon = "X"
-                    if ($result.ExitCode -eq 0) { $icon = "OK" }
-
-                    # Last line of output for summary
-                    $resultShort = "exit $($result.ExitCode)"
-                    $trimmed = $result.Output.Trim()
-                    if ($trimmed.Length -gt 0) {
-                        $lines = $trimmed.Split("`n")
-                        $lastLine = $lines[$lines.Length - 1]
-                        if ($lastLine.Length -gt 30) {
-                            $resultShort = $lastLine.Substring(0, 30)
+                    if ($msg.type -eq "exec") {
+                        $cmdShort = $msg.command
+                        if ($cmdShort.Length -gt 40) {
+                            $cmdShort = $cmdShort.Substring(0, 40) + "..."
                         }
-                        elseif ($lastLine.Length -gt 0) {
-                            $resultShort = $lastLine
+
+                        Show-Status -SessionName $Name -Status "Running..."
+                        Write-Host "  >> [$(Get-Timestamp)] $cmdShort"
+
+                        $result = Invoke-RelayCommand -Id $msg.id -Command $msg.command -Ws $ws
+
+                        $icon = "X"
+                        if ($result.ExitCode -eq 0) { $icon = "OK" }
+
+                        $resultShort = "exit $($result.ExitCode)"
+                        $trimmed = "$($result.Output)".Trim()
+                        if ($trimmed.Length -gt 0) {
+                            $lines = $trimmed.Split("`n")
+                            $lastLine = $lines[$lines.Length - 1]
+                            if ($lastLine.Length -gt 30) {
+                                $resultShort = $lastLine.Substring(0, 30)
+                            }
+                            elseif ($lastLine.Length -gt 0) {
+                                $resultShort = $lastLine
+                            }
                         }
+
+                        $script:LogBuffer.Add(@{ Icon = ">> [$(Get-Timestamp)]"; Text = $cmdShort }) | Out-Null
+                        $script:LogBuffer.Add(@{ Icon = $icon; Text = $resultShort }) | Out-Null
+
+                        Send-WsMessage -Ws $ws -Message @{
+                            type     = "done"
+                            id       = $msg.id
+                            exitCode = $result.ExitCode
+                        }
+
+                        Show-Status -SessionName $Name -Status "Waiting..."
                     }
-
-                    $script:LogBuffer.Add(@{ Icon = ">> [$(Get-Timestamp)]"; Text = $cmdShort }) | Out-Null
-                    $script:LogBuffer.Add(@{ Icon = $icon; Text = $resultShort }) | Out-Null
-
-                    Send-WsMessage -Ws $ws -Message @{
-                        type     = "done"
-                        id       = $msg.id
-                        exitCode = $result.ExitCode
-                    }
-
-                    Show-Status -SessionName $Name -Status "Waiting..."
+                }
+                catch {
+                    # Log but don't break the connection for transient errors
+                    Write-Host "  Loop error: $($_.Exception.Message)" -ForegroundColor Yellow
                 }
             }
         }

@@ -179,9 +179,22 @@ export default function Home() {
     <main className="min-h-screen">
       <NavBar />
 
-      {/* ═══ 1. Hero — 풀스크린, 결과를 먼저 ═══ */}
-      <section className="min-h-screen flex flex-col items-center justify-center px-6 relative">
-        <div className="max-w-4xl mx-auto text-center">
+      {/* ═══ 1. Hero — 풀스크린, 배경 비디오 ═══ */}
+      <section className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden">
+        {/* Background video */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/hero.mp4" type="video/mp4" />
+        </video>
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-white/80" />
+
+        <div className="max-w-4xl mx-auto text-center relative z-10">
           <h1 className="text-5xl md:text-7xl font-extrabold text-heading tracking-heading leading-[1.1] mb-6">
             반복 업무,
             <br />
@@ -212,7 +225,7 @@ export default function Home() {
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce z-10">
           <ArrowDown size={24} className="text-caption" />
         </div>
       </section>

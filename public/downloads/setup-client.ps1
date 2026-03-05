@@ -194,9 +194,9 @@ function Receive-WsMessage {
     }
     catch {
         $cts.Dispose()
+        # Unwrap through all layers: MethodInvocationException → AggregateException → actual
         $inner = $_.Exception
-        # Unwrap AggregateException
-        if ($inner -is [System.AggregateException]) {
+        while ($inner.InnerException) {
             $inner = $inner.InnerException
         }
         # TaskCanceledException = normal timeout, not an error

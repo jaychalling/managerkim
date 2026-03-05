@@ -35,7 +35,8 @@ app/
     [slug]/page.tsx                     # 가이드 상세 페이지
   survey/page.tsx                       # 워크샵 설문 폼
   api/survey/route.ts                   # 설문 프록시 → VPS
-  vps/page.tsx                          # VPS 홍보 페이지
+  vps/page.tsx                          # VPS 홍보 페이지 (NavBar 숨김)
+  setup/page.tsx                        # Easy클코 설치 프로그램 다운로드 랜딩
   tools/page.tsx                        # 무료/저렴한 서비스 카탈로그
 components/ui/
   NavBar.tsx                            # 미니멀 고정 네비 (uppercase tracking)
@@ -59,6 +60,10 @@ lib/
   docs.ts                               # 14개 기능 가이드 데이터
   tools.ts                              # 25개 서비스 카탈로그 데이터
   courses.ts                            # (legacy, 미사용)
+public/
+  downloads/
+    install-windows.ps1                 # Easy클코 Windows 설치 스크립트 (정본)
+    install-mac.sh                      # Easy클코 Mac 설치 스크립트 (정본)
 ```
 
 **학습 시스템**: 문서 가이드 형태. 6챕터 (에이전틱AI → 세팅 → Gmail → 엑셀 → PPT → 마무리). 각 챕터는 sections로 구성되어 사이드바 TOC 제공. 진도는 `localStorage`에 `progress-guide` 키로 저장. 콘텐츠는 workshop-slides/index.html 기반이되, 자기학습용으로 확장. API 키가 아닌 구독 방식(Max $110/월 추천).
@@ -88,6 +93,12 @@ lib/
 | `border-default` | `#d0d0d0` | 입력 테두리 |
 
 폰트: Pretendard (`font-sans`). borderRadius: card `0.75rem`, card-sm `0.5rem`.
+
+## 공유 파일 규칙
+
+이 repo는 Vercel 배포를 위해 **자기 완결적**이어야 함. 부모 repo(Manager Kim)의 파일을 참조하면 빌드가 깨진다.
+- 설치 스크립트 정본: `public/downloads/`. 수정 후 부모 repo `education/setup/`에 역복사.
+- 새로운 공유 파일이 필요하면 이 repo에 직접 추가.
 
 ## 워크샵 상태
 
